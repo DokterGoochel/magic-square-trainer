@@ -7,7 +7,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS: Jouw basis, uitgebreid met de blokkade tegen verticaal stapelen
+# Custom CSS gebaseerd op jouw stabiele versie, met de fix tegen het onder elkaar stapelen
 st.markdown("""
     <style>
     /* Maak de invoervelden groter en centreer de tekst (Uit jouw basis) */
@@ -23,19 +23,19 @@ st.markdown("""
         margin: 0;
     }
     
-    /* DE FIX VOOR PORTRAIT: Forceer de kolommen om ALTIJD naast elkaar te blijven staan */
+    /* DE FIXED LOGICA TEGEN HET VERTICAAL STAPELEN */
     [data-testid="stHorizontalBlock"] {
         display: flex !important;
-        flex-direction: row !important; /* Dwingt een horizontale rij af, nooit verticaal */
-        flex-wrap: nowrap !important;   /* Voorkomt dat vakjes naar de volgende regel springen */
-        gap: 6px !important;            /* Ruimte tussen de kolommen op mobiel */
+        flex-direction: row !important; /* Dwingt te allen tijde een horizontale rij af */
+        flex-wrap: nowrap !important;   /* Voorkomt dat kolommen naar een nieuwe regel springen */
+        gap: 6px !important;            /* Ruimte tussen de vakjes op mobiel */
         width: 100% !important;
     }
     
     [data-testid="column"] {
-        flex: 1 1 0% !important;        /* Verdeelt de beschikbare ruimte exact gelijk */
-        min-width: 0px !important;       /* Staat toe dat de kolom smaller wordt dan de standaard */
-        padding: 0px !important;         /* Verwijdert extra marges die het scherm uitduwen */
+        padding: 2px !important;         /* Iets compacter dan 5px zodat het makkelijker past */
+        min-width: 0px !important;       /* Strijkt de minimale breedte van Streamlit glad */
+        flex: 1 1 0% !important;        /* Verdeelt de kolommen exact gelijk over het scherm */
     }
     </style>
     """, unsafe_allow_html=True)
@@ -91,7 +91,6 @@ if st.button("CHECK NOW", type="primary", use_container_width=True):
     if diag2 != doelgetal:
         foutmeldingen.append(f"❌ Diagonal top-right to bottom-left is incorrect. (Sum is {diag2})")
 
-    if not foutglow:
     if not foutmeldingen:
         st.success(f"🎉 Perfect! The square is magic (Sum = {doelgetal})!")
         st.balloons()
