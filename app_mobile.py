@@ -7,7 +7,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# We behouden alleen de CSS voor jouw gele knop
+# Alleen de CSS voor jouw gele knop blijft over
 st.markdown("""
     <style>
     div.stButton > button[kind="primary"] {
@@ -27,25 +27,24 @@ st.write("Fill in the square. The first row automatically determines the target 
 
 st.write("---")
 
-# We maken een 4x4 'Excel-achtig' raster (DataFrame) in het geheugen
+# We maken het 4x4 raster in het geheugen
 if 'magic_grid' not in st.session_state:
-    # We vullen hem met 'None' zodat de vakjes standaard leeg zijn
+    # TRUC: We gebruiken oplopende aantallen spaties als kolomnamen zodat ze onzichtbaar zijn
     st.session_state.magic_grid = pd.DataFrame(
         [[None, None, None, None] for _ in range(4)],
-        columns=["C1", "C2", "C3", "C4"]
+        columns=["", " ", "  ", "   "]
     )
 
-# De st.data_editor is Streamlit's native 'bewerkbare tabel'
-# Dit past op ELK scherm en gedraagt zich als een spreadsheet
+# De data_editor
 edited_df = st.data_editor(
     st.session_state.magic_grid,
     hide_index=True,
     use_container_width=True,
     column_config={
-        "C1": st.column_config.NumberColumn("Col 1", min_value=0, max_value=999, step=1),
-        "C2": st.column_config.NumberColumn("Col 2", min_value=0, max_value=999, step=1),
-        "C3": st.column_config.NumberColumn("Col 3", min_value=0, max_value=999, step=1),
-        "C4": st.column_config.NumberColumn("Col 4", min_value=0, max_value=999, step=1),
+        "": st.column_config.NumberColumn(label="", min_value=0, max_value=999, step=1),
+        " ": st.column_config.NumberColumn(label="", min_value=0, max_value=999, step=1),
+        "  ": st.column_config.NumberColumn(label="", min_value=0, max_value=999, step=1),
+        "   ": st.column_config.NumberColumn(label="", min_value=0, max_value=999, step=1),
     }
 )
 
@@ -53,7 +52,6 @@ st.write("---")
 
 # De knop
 if st.button("CHECK NOW", type="primary", use_container_width=True):
-    # We zetten de tabel om naar een rekenmatrix en maken van lege vakjes een 0
     matrix = edited_df.fillna(0).values.tolist()
     foutmeldingen = []
 
