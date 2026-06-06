@@ -7,63 +7,74 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# De ultieme CSS-injectie om de minimale breedte van Streamlit te vernietigen
+# Ultieme CSS-injectie om Streamlit's minimale pixelbreedte volledig te slopen
 st.markdown("""
     <style>
-    /* 1. Verwijder alle marges van de hoofdpagina zodat we de breedte optimaal benutten */
+    /* 1. Verwijder alle marges en borders van de hoofdcontainer op mobiel */
     .block-container {
-        padding-left: 8px !important;
-        padding-right: 8px !important;
-        padding-top: 15px !important;
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+        padding-top: 10px !important;
         max-width: 100% !important;
     }
     
-    /* 2. Forceer de horizontale rij om ALTIJD 100% van het scherm te zijn, zonder scrollbalk */
+    /* 2. Dwing de rij om exact de breedte van het scherm te zijn zonder overflow */
     [data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
-        gap: 4px !important; 
+        gap: 3px !important; 
         width: 100% !important;
         margin: 0px !important;
         padding: 0px !important;
     }
     
-    /* 3. Dwing elke kolom op exact 25% van de beschikbare schermruimte */
+    /* 3. Geef elke kolom exact een kwart van het scherm minus de gap */
     [data-testid="column"] {
         width: calc(25% - 3px) !important;
         flex: 1 1 calc(25% - 3px) !important;
         min-width: 0px !important;
+        max-width: 25% !important;
         padding: 0px !important;
         margin: 0px !important;
     }
 
-    /* 4. VERNIETIG DE MINIMALE BREEDTE VAN HET STREAMLIT ELEMENT */
+    /* 4. OVERSCHRIJF DE MINIMALE BREEDTE VAN HET STREAMLIT ELEMENT */
     div[data-testid="stNumberInput"] {
         width: 100% !important;
         min-width: 0px !important;
+        max-width: 100% !important;
     }
     div[data-testid="stNumberInput"] > div {
         width: 100% !important;
         min-width: 0px !important;
+        max-width: 100% !important;
     }
-
-    /* 5. Stijl het daadwerkelijke invoervak (de input tag zelf) */
-    input {
-        font-size: 20px !important;
-        text-align: center !important;
-        height: 50px !important;
-        padding: 0px !important;
+    div[data-testid="stNumberInput"] input {
         width: 100% !important;
         min-width: 0px !important;
+        max-width: 100% !important;
+    }
+
+    /* 5. Stijl het daadwerkelijke invoervak super compact voor portrait modus */
+    input {
+        font-size: 18px !important;
+        text-align: center !important;
+        height: 45px !important; /* Iets minder hoog voor betere verhouding */
+        padding: 0px !important;
+        margin: 0px !important;
         box-sizing: border-box !important;
     }
     
-    /* Verwijder de pijltjes bij de getallen */
+    /* Verwijder alle pijltjes en extra padding aan de binnenkant */
     input::-webkit-outer-spin-button,
     input::-webkit-inner-spin-button {
         -webkit-appearance: none;
         margin: 0;
+    }
+    
+    .stNumberInput div div {
+        padding-right: 0px !important; /* Verwijdert de verborgen ruimte voor de pijltjes */
     }
 
     /* DE GELE CONTROLEKNOP */
