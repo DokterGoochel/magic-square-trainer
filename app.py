@@ -7,16 +7,25 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Gecorrigeerde CSS die voorkomt dat kolommen onder elkaar klappen op mobiel
+# Geoptimaliseerde CSS voor een perfect passend 4x4 raster op mobiel
 st.markdown("""
     <style>
-    /* Maak de invoervelden groter en centreer de tekst */
-    input {
-        font-size: 22px !important;
-        text-align: center !important;
-        height: 55px !important;
-        padding: 0px !important;
+    /* Zorg dat de hoofdcontainer geen onnodige marges heeft op mobiel */
+    .block-container {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+        padding-top: 20px !important;
     }
+    
+    /* Maak de invoervelden compacter zodat ze NOOIT buiten het scherm lopen */
+    input {
+        font-size: 20px !important;
+        text-align: center !important;
+        height: 50px !important;
+        padding: 0px !important;
+        width: 100% !important; /* Dwing het veld binnen zijn kolom te blijven */
+    }
+    
     /* Verwijder de pijltjes (spinners) bij de getallen */
     input::-webkit-outer-spin-button,
     input::-webkit-inner-spin-button {
@@ -24,16 +33,19 @@ st.markdown("""
         margin: 0;
     }
     
-    /* FORCEER 4 KOLOMMEN NAAST ELKAAR OP MOBIEL */
+    /* FORCEER 4 KOLOMMEN STRAK NAAST ELKAAR */
     [data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
-        gap: 6px !important;
+        gap: 4px !important; /* Kleine opening tussen de vakjes */
+        width: 100% !important;
     }
+    
+    /* Verdeel de kolommen exact in vieren (25% minus een kleine marge voor de gap) */
     [data-testid="column"] {
-        width: 23% !important;
-        flex: 1 1 23% !important;
+        width: calc(25% - 3px) !important;
+        flex: 1 1 calc(25% - 3px) !important;
         min-width: 0px !important;
         padding: 0px !important;
     }
@@ -63,11 +75,10 @@ st.write("Fill in the square. The first row automatically determines the target 
 
 st.write("---")
 
-# Het 4x4 raster - Geforceerd in grid-layout
+# Het 4x4 raster - Perfect passend op elk scherm
 with st.container():
     inputs = []
     for r in range(4):
-        # We maken per rij 4 kolommen aan
         cols = st.columns(4)
         for c in range(4):
             with cols[c]:
