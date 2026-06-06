@@ -1,64 +1,87 @@
 import streamlit as st
 
-st.set_page_config(page_title="Magic Square Trainer", layout="centered")
+# Pagina-instellingen voor mobiel
+st.set_page_config(
+    page_title="Magic Square Trainer", 
+    layout="centered", 
+    initial_sidebar_state="collapsed"
+)
 
-st.title("🪄 Magic Square Trainer")
-st.write("Welkom bij je persoonlijke trainer! Vul de getallen in en de app controleert direct de logica.")
+# Custom CSS om de invoervelden groter en 'mobiel-vriendelijker' te maken
+st.markdown("""
+    <style>
+    /* Maak de invoervelden groter en centreer de tekst */
+    input {
+        font-size: 24px !important;
+        text-align: center !important;
+        height: 60px !important;
+    }
+    /* Verwijder de pijltjes (spinners) bij de getallen voor een cleaner uiterlijk */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    /* Zorg dat de kolommen op mobiel niet te veel marge hebben */
+    [data-testid="column"] {
+        padding: 5px !important;
+    }
+    </style>
+    """, unsafe_allow_stdio=True)
 
-# Wij maken een container voor het magische vierkant
-with st.container():
-    cols = st.columns(4)
-    inputs = []
-    
-    # We genereren een 4x4 grid voor de invoer
-    for i in range(16):
-        col_idx = i % 4
-        with cols[col_idx]:
-            val = st.number_input(
-                label=f"Cel {i+1}", 
-                min_value=0, 
-                max_value=999, 
-                value=0, 
-                key=f"magic_cell_{i}", 
-                label_visibility="collapsed"
-            )
-            inputs.append(val)
+st.title("🪄 Magic Square Trainer V2")
+st.write("Welcome to the magic square trainer! Enter the numbers and the app will instantly check the logic.")
+
+# Doelgetal bovenin (vaak handig bij magische vierkanten)
+doelgetal = st.number_input("Doelgetal", min_value=1, value=34, step=1)
 
 st.write("---")
 
-# De controleknop (als vervanger van het automatische doorrekenen in Excel)
-if st.button("Controleer Vierkant", type="primary", use_container_width=True):
-    # We zetten de 16 losse inputs om naar een 2D matrix (4 rijen van 4)
+# Het 4x4 raster - Geoptimaliseerd voor touch
+with st.container():
+    # We maken 4 rijen van 4 kolommen
+    inputs = []
+    for r in range(4):
+        cols = st.columns(4)
+        for c in range(4):
+            with cols[c]:
+                # We gebruiken een unieke key per cel
+                val = st.number_input(
+                    label=f"R{r}K{c}",
+                    min_value=0,
+                    max_value=999,
+                    value=0,
+                    key=f"cell_{r}_{c}",
+                    label_visibility="collapsed"
+                )
+                inputs.append(val)
+
+st.write("---")
+
+# Grote knop voor 'dikke duimen'
+if st.button("CHECK NOW", type="primary", use_container_width=True):
+    # Logica omzetten naar matrix
     matrix = [inputs[i:i+4] for i in range(0, 16, 4)]
-    
-    # Excel ALS-logica vertaling:
-    # We pakken de som van de eerste rij als het referentie-doelgetal
-    target_sum = sum(matrix[0])
     fout_gevonden = False
-    
-    # 1. Controleer alle rijen en kolommen
+    foutmeldingen = []
+
+    # Check rijen en kolommen
     for i in range(4):
-        rij_som = sum(matrix[i])
-        kolom_som = sum(matrix[r][i] for r in range(4))
-        
-        if rij_som != target_sum:
-            st.error(f"❌ Rij {i+1} klopt niet (Som is {rij_som}, moet {target_sum} zijn)")
-            fout_gevonden = True
-        if kolom_som != target_sum:
-            st.error(f"❌ Kolom {i+1} klopt niet (Som is {kolom_som}, moet {target_sum} zijn)")
-            fout_gevonden = True
+        if sum(matrix[i]) != doelgetal:
+            foutmeldingen.append(f"Row {i+1} is incorrect.")
+        if sum(matrix[r][i] for r in range(4)) != doelgetal:
+            foutmeldingen.append(f"Column {i+1} is incorrect.")
 
-    # 2. Controleer de diagonalen
-    diag1 = sum(matrix[i][i] for i in range(4))
-    diag2 = sum(matrix[i][3-i] for i in range(4))
-    
-    if diag1 != target_sum:
-        st.error(f"❌ Diagonaal linksboven naar rechtsonder klopt niet (Som is {diag1})")
-        fout_gevonden = True
-    if diag2 != target_sum:
-        st.error(f"❌ Diagonaal rechtsboven naar linksonder klopt niet (Som is {diag2})")
-        fout_gevonden = True
+    # Check diagonalen
+    if sum(matrix[i][i] for i in range(4)) != doelgetal:
+        foutmeldingen.append("Diagonal (top left-bottom right) is incorrect.")
+    if sum(matrix[i][3-i] for i in range(4)) != doelgetal:
+        foutmeldingen.append("Diagonal (bottom left-top right) is incorrect.")
 
-    # 3. Het eindoordeel (De ultieme ALS/DAN plakkaat)
-    if not fout_gevonden:
-        st.success(f"🎉 Perfect! Het vierkant is magisch. De constante som is {target_sum}!")
+    # Resultaat tonen
+    if not foutmeldingen:
+        st.success(f"🎉 Perfect! All rows, columns, corners, diagonals and inner squares add up to {doelgetal}!")
+        st.balloons()
+    else:
+        for fout in foutmeldingen:
+            st.error(fout). De constante som is {target_sum}!")
