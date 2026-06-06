@@ -16,36 +16,34 @@ st.markdown("""
         text-align: center !important;
         height: 60px !important;
     }
-    /* Verwijder de pijltjes (spinners) bij de getallen voor een cleaner uiterlijk */
+    /* Verwijder de pijltjes (spinners) bij de getallen */
     input::-webkit-outer-spin-button,
     input::-webkit-inner-spin-button {
         -webkit-appearance: none;
         margin: 0;
     }
-    /* Zorg dat de kolommen op mobiel niet te veel marge hebben */
+    /* Zorg dat de kolommen op mobiel goed aansluiten */
     [data-testid="column"] {
         padding: 5px !important;
     }
     </style>
-    """, unsafe_allow_stdio=True)
+    """, unsafe_allow_html=True)
 
 st.title("🪄 Magic Square Trainer V2")
 st.write("Welcome to the magic square trainer! Enter the numbers and the app will instantly check the logic.")
 
-# Doelgetal bovenin (vaak handig bij magische vierkanten)
+# Doelgetal invoeren
 doelgetal = st.number_input("Doelgetal", min_value=1, value=34, step=1)
 
 st.write("---")
 
 # Het 4x4 raster - Geoptimaliseerd voor touch
 with st.container():
-    # We maken 4 rijen van 4 kolommen
     inputs = []
     for r in range(4):
         cols = st.columns(4)
         for c in range(4):
             with cols[c]:
-                # We gebruiken een unieke key per cel
                 val = st.number_input(
                     label=f"R{r}K{c}",
                     min_value=0,
@@ -58,30 +56,35 @@ with st.container():
 
 st.write("---")
 
-# Grote knop voor 'dikke duimen'
+# Grote knop voor mobiel gebruik
 if st.button("CHECK NOW", type="primary", use_container_width=True):
-    # Logica omzetten naar matrix
+    # Waarden omzetten naar een 4x4 matrix
     matrix = [inputs[i:i+4] for i in range(0, 16, 4)]
-    fout_gevonden = False
     foutmeldingen = []
 
     # Check rijen en kolommen
     for i in range(4):
-        if sum(matrix[i]) != doelgetal:
-            foutmeldingen.append(f"Row {i+1} is incorrect.")
-        if sum(matrix[r][i] for r in range(4)) != doelgetal:
-            foutmeldingen.append(f"Column {i+1} is incorrect.")
+        rij_som = sum(matrix[i])
+        kolom_som = sum(matrix[r][i] for r in range(4))
+        
+        if rij_som != doelgetal:
+            foutmeldingen.append(f"❌ Row {i+1} is incorrect. (Sum is {rij_som})")
+        if kolom_som != doelgetal:
+            foutmeldingen.append(f"❌ Column {i+1} is incorrect. (Sum is {kolom_som})")
 
     # Check diagonalen
-    if sum(matrix[i][i] for i in range(4)) != doelgetal:
-        foutmeldingen.append("Diagonal (top left-bottom right) is incorrect.")
-    if sum(matrix[i][3-i] for i in range(4)) != doelgetal:
-        foutmeldingen.append("Diagonal (bottom left-top right) is incorrect.")
+    diag1 = sum(matrix[i][i] for i in range(4))
+    diag2 = sum(matrix[i][3-i] for i in range(4))
 
-    # Resultaat tonen
+    if diag1 != doelgetal:
+        foutmeldingen.append(f"❌ Diagonal (top left-bottom right) is incorrect. (Sum is {diag1})")
+    if diag2 != doelgetal:
+        foutmeldingen.append(f"❌ Diagonal (bottom left-top right) is incorrect. (Sum is {diag2})")
+
+    # Het eindoordeel tonen
     if not foutmeldingen:
         st.success(f"🎉 Perfect! All rows, columns, corners, diagonals and inner squares add up to {doelgetal}!")
         st.balloons()
     else:
         for fout in foutmeldingen:
-            st.error(fout). De constante som is {target_sum}!")
+            st.error(fout)
