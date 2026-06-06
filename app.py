@@ -1,21 +1,20 @@
 import streamlit as st
 
-# Pagina-instellingen voor mobiel
+# Pagina-instellingen voor mobiel (Uit jouw stabiele basis)
 st.set_page_config(
     page_title="Magic Square Trainer", 
     layout="centered", 
     initial_sidebar_state="collapsed"
 )
 
-# Gecorrigeerde CSS die voorkomt dat kolommen onder elkaar klappen op mobiel
+# Custom CSS: Jouw exacte basis, maar met intelligente schermdetectie
 st.markdown("""
     <style>
-    /* Maak de invoervelden groter en centreer de tekst */
+    /* Maak de invoervelden groter en centreer de tekst (Uit jouw basis) */
     input {
-        font-size: 22px !important;
+        font-size: 24px !important;
         text-align: center !important;
-        height: 55px !important;
-        padding: 0px !important;
+        height: 60px !important;
     }
     /* Verwijder de pijltjes (spinners) bij de getallen */
     input::-webkit-outer-spin-button,
@@ -24,36 +23,26 @@ st.markdown("""
         margin: 0;
     }
     
-    /* FORCEER 4 KOLOMMEN NAAST ELKAAR OP MOBIEL */
-    [data-testid="stHorizontalBlock"] {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        gap: 6px !important;
+    /* SLIMME SCHERMDETECTIE (MEDIA QUERY) */
+    /* Als het scherm breed is (Desktop / Landscape) -> Gebruik jouw originele padding */
+    @media (min-width: 600px) {
+        [data-testid="column"] {
+            padding: 5px !important;
+        }
     }
-    [data-testid="column"] {
-        width: 23% !important;
-        flex: 1 1 23% !important;
-        min-width: 0px !important;
-        padding: 0px !important;
-    }
-
-    /* HIER MAKEN WE DE CONTROLEKNOP GEEL */
-    div.stButton > button[kind="primary"] {
-        background-color: #FFDE00 !important;
-        color: #000000 !important;
-        border-color: #FFDE00 !important;
-        font-weight: bold !important;
-        font-size: 18px !important;
-        height: 50px !important;
-        margin-top: 15px;
-    }
-    div.stButton > button[kind="primary"]:hover, 
-    div.stButton > button[kind="primary"]:active, 
-    div.stButton > button[kind="primary"]:focus {
-        background-color: #E6C600 !important;
-        border-color: #E6C600 !important;
-        color: #000000 !important;
+    
+    /* Als het scherm smal is (Mobiel Portrait) -> Krimp de marges om overflow te stoppen */
+    @media (max-width: 599px) {
+        .block-container {
+            padding-left: 6px !important;
+            padding-right: 6px !important;
+        }
+        [data-testid="stHorizontalBlock"] {
+            gap: 4px !important;
+        }
+        [data-testid="column"] {
+            padding: 0px !important; /* Verwijdert de 40px die het vierkant naar rechts drukten */
+        }
     }
     </style>
     """, unsafe_allow_html=True)
@@ -63,11 +52,10 @@ st.write("Fill in the square. The first row automatically determines the target 
 
 st.write("---")
 
-# Het 4x4 raster - Geforceerd in grid-layout
+# Het 4x4 raster - Geoptimaliseerd voor touch
 with st.container():
     inputs = []
     for r in range(4):
-        # We maken per rij 4 kolommen aan
         cols = st.columns(4)
         for c in range(4):
             with cols[c]:
@@ -84,7 +72,7 @@ with st.container():
 
 st.write("---")
 
-# De knop
+# De knop (Uit jouw stabiele basis)
 if st.button("CHECK NOW", type="primary", use_container_width=True):
     veilig_inputs = [x if x is not None else 0 for x in inputs]
     matrix = [veilig_inputs[i:i+4] for i in range(0, 16, 4)]
@@ -106,12 +94,12 @@ if st.button("CHECK NOW", type="primary", use_container_width=True):
     diag2 = sum(matrix[i][3-i] for i in range(4))
 
     if diag1 != doelgetal:
-        foutmeldingen.append(f"❌ Diagonal (top left-bottom right) is incorrect. (Sum is {diag1})")
+        foutmeldingen.append(f"❌ Diagonal top-left to bottom-right is incorrect. (Sum is {diag1})")
     if diag2 != doelgetal:
-        foutmeldingen.append(f"❌ Diagonal (bottom left-top right) is incorrect. (Sum is {diag2})")
+        foutmeldingen.append(f"❌ Diagonal top-right to bottom-left is incorrect. (Sum is {diag2})")
 
     if not foutmeldingen:
-        st.success(f"🎉 Perfect. This square is magical in every way (Sum = {doelgetal})!")
+        st.success(f"🎉 Perfect! The square is magic (Sum = {doelgetal})!")
         st.balloons()
     else:
         for fout in foutmeldingen:
