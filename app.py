@@ -7,24 +7,18 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Ultieme CSS-overrule om stapelen en uitlopen te voorkomen
+# De ultieme CSS-injectie om de minimale breedte van Streamlit te vernietigen
 st.markdown("""
     <style>
-    /* Verwijder alle zijwaartse witruimte van de Streamlit pagina op mobiel */
+    /* 1. Verwijder alle marges van de hoofdpagina zodat we de breedte optimaal benutten */
     .block-container {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
+        padding-left: 8px !important;
+        padding-right: 8px !important;
         padding-top: 15px !important;
         max-width: 100% !important;
     }
     
-    /* Dwing de container om exact 100% van de schermbreedte te pakken */
-    [data-testid="stVerticalBlock"] {
-        width: 100% !important;
-        padding: 0px !important;
-    }
-
-    /* FORCEER 4 KOLOMMEN NAAST ELKAAR (NOOIT ONDER ELKAAR) */
+    /* 2. Forceer de horizontale rij om ALTIJD 100% van het scherm te zijn, zonder scrollbalk */
     [data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-direction: row !important;
@@ -35,22 +29,33 @@ st.markdown("""
         padding: 0px !important;
     }
     
-    /* Geef elke kolom exact een kwart van de beschikbare schermruimte */
+    /* 3. Dwing elke kolom op exact 25% van de beschikbare schermruimte */
     [data-testid="column"] {
-        width: 25% !important;
-        flex: 1 1 25% !important;
+        width: calc(25% - 3px) !important;
+        flex: 1 1 calc(25% - 3px) !important;
         min-width: 0px !important;
         padding: 0px !important;
         margin: 0px !important;
     }
 
-    /* Maak de invoervakken compact en dwing ze binnen de kolom */
+    /* 4. VERNIETIG DE MINIMALE BREEDTE VAN HET STREAMLIT ELEMENT */
+    div[data-testid="stNumberInput"] {
+        width: 100% !important;
+        min-width: 0px !important;
+    }
+    div[data-testid="stNumberInput"] > div {
+        width: 100% !important;
+        min-width: 0px !important;
+    }
+
+    /* 5. Stijl het daadwerkelijke invoervak (de input tag zelf) */
     input {
-        font-size: 18px !important;
+        font-size: 20px !important;
         text-align: center !important;
         height: 50px !important;
         padding: 0px !important;
         width: 100% !important;
+        min-width: 0px !important;
         box-sizing: border-box !important;
     }
     
@@ -74,8 +79,8 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-st.title("🪄 Magic Square Trainer V2")
-st.write("Fill in the square. The first row automatically determines the target number against which it is checked.")
+st.title("🪄 Magic Trainer V2")
+st.write("De eerste rij bepaalt automatisch het doelgetal.")
 
 st.write("---")
 
@@ -100,33 +105,33 @@ with st.container():
 st.write("---")
 
 # De knop
-if st.button("CHECK NOW", type="primary", use_container_width=True):
+if st.button("CONTROLEER NU", type="primary", use_container_width=True):
     veilig_inputs = [x if x is not None else 0 for x in inputs]
     matrix = [veilig_inputs[i:i+4] for i in range(0, 16, 4)]
     foutmeldingen = []
 
     doelgetal = sum(matrix[0])
-    st.info(f"🎯 Check based on the first row. Target number is: **{doelgetal}**")
+    st.info(f"🎯 Controle op basis van eerste rij. Doelgetal: **{doelgetal}**")
 
     for i in range(4):
         rij_som = sum(matrix[i])
         kolom_som = sum(matrix[r][i] for r in range(4))
         
         if rij_som != doelgetal:
-            foutmeldingen.append(f"❌ Row {i+1} is incorrect. (Sum is {rij_som})")
+            foutmeldingen.append(f"❌ Rij {i+1} klopt niet (Som is {rij_som})")
         if kolom_som != doelgetal:
-            foutmeldingen.append(f"❌ Column {i+1} is incorrect. (Sum is {kolom_som})")
+            foutmeldingen.append(f"❌ Kolom {i+1} klopt niet (Som is {kolom_som})")
 
     diag1 = sum(matrix[i][i] for i in range(4))
     diag2 = sum(matrix[i][3-i] for i in range(4))
 
     if diag1 != doelgetal:
-        foutmeldingen.append(f"❌ Diagonal (top left-bottom right) is incorrect. (Sum is {diag1})")
+        foutmeldingen.append(f"❌ Diagonaal linksboven-rechtsonder klopt niet (Som is {diag1})")
     if diag2 != doelgetal:
-        foutmeldingen.append(f"❌ Diagonal (bottom left-top right) is incorrect. (Sum is {diag2})")
+        foutmeldingen.append(f"❌ Diagonaal rechtsboven-linksonder klopt niet (Som is {diag2})")
 
     if not foutmeldingen:
-        st.success(f"🎉 Perfect. This square is magical in every way (Sum = {doelgetal})!")
+        st.success(f"🎉 Perfect! Het vierkant is magisch (Som = {doelgetal})!")
         st.balloons()
     else:
         for fout in foutmeldingen:
