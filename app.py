@@ -7,7 +7,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS om de invoervelden groter en 'mobiel-vriendelijker' te maken
+# Custom CSS voor mobiele optimalisatie EN de gele knop
 st.markdown("""
     <style>
     /* Maak de invoervelden groter en centreer de tekst */
@@ -26,6 +26,24 @@ st.markdown("""
     [data-testid="column"] {
         padding: 5px !important;
     }
+    
+    /* HIER MAKEN WE DE CONTROLEKNOP GEEL */
+    div.stButton > button[kind="primary"] {
+        background-color: #FFDE00 !important; /* Mooi helder geel */
+        color: #000000 !important;            /* Zwarte tekst voor goede leesbaarheid */
+        border-color: #FFDE00 !important;
+        font-weight: bold !important;
+        font-size: 18px !important;
+        height: 50px !important;
+    }
+    /* Kleur als je op de knop drukt of eroverheen zweeft */
+    div.stButton > button[kind="primary"]:hover, 
+    div.stButton > button[kind="primary"]:active, 
+    div.stButton > button[kind="primary"]:focus {
+        background-color: #E6C600 !important;
+        border-color: #E6C600 !important;
+        color: #000000 !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -34,15 +52,13 @@ st.write("Fill in the square. The first row automatically determines the target 
 
 st.write("---")
 
-# Het 4x4 raster - Geoptimaliseerd voor touch en direct typen
+# Het 4x4 raster
 with st.container():
     inputs = []
     for r in range(4):
         cols = st.columns(4)
         for c in range(4):
             with cols[c]:
-                # Door value=None te gebruiken zijn de velden standaard leeg. 
-                # Geen irritante 0 meer die je moet weghalen!
                 val = st.number_input(
                     label=f"R{r}K{c}",
                     min_value=0,
@@ -56,7 +72,7 @@ with st.container():
 
 st.write("---")
 
-# Grote knop voor mobiel gebruik
+# De knop (wordt nu automatisch geel door de CSS hierboven)
 if st.button("CHECK NOW", type="primary", use_container_width=True):
     # Als een veld leeg is (None), maken we er voor de berekening een 0 van
     veilig_inputs = [x if x is not None else 0 for x in inputs]
