@@ -34,18 +34,21 @@ st.write("Fill in the square. The first row automatically determines the target 
 
 st.write("---")
 
-# Het 4x4 raster - Geoptimaliseerd voor touch
+# Het 4x4 raster - Geoptimaliseerd voor touch en direct typen
 with st.container():
     inputs = []
     for r in range(4):
         cols = st.columns(4)
         for c in range(4):
             with cols[c]:
+                # Door value=None te gebruiken zijn de velden standaard leeg. 
+                # Geen irritante 0 meer die je moet weghalen!
                 val = st.number_input(
                     label=f"R{r}K{c}",
                     min_value=0,
                     max_value=999,
-                    value=0,
+                    value=None, 
+                    step=1,
                     key=f"cell_{r}_{c}",
                     label_visibility="collapsed"
                 )
@@ -55,8 +58,11 @@ st.write("---")
 
 # Grote knop voor mobiel gebruik
 if st.button("CHECK NOW", type="primary", use_container_width=True):
+    # Als een veld leeg is (None), maken we er voor de berekening een 0 van
+    veilig_inputs = [x if x is not None else 0 for x in inputs]
+    
     # Waarden omzetten naar een 4x4 matrix
-    matrix = [inputs[i:i+4] for i in range(0, 16, 4)]
+    matrix = [veilig_inputs[i:i+4] for i in range(0, 16, 4)]
     foutmeldingen = []
 
     # De allereerste rij (Rij 1) bepaalt de controle-uitkomst (het doelgetal)
