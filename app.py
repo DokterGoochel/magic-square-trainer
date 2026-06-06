@@ -1,75 +1,41 @@
 import streamlit as st
 
-# Pagina-instellingen voor mobiel
+# Pagina-instellingen voor mobiel (Uit jouw stabiele basis)
 st.set_page_config(
     page_title="Magic Square Trainer", 
     layout="centered", 
     initial_sidebar_state="collapsed"
 )
 
-# Ultieme CSS-overrule om stapelen en uitlopen te voorkomen
+# Gerichte CSS: Behoudt jouw styling, maar lost de portrait-overflow op
 st.markdown("""
     <style>
-    /* Verwijder alle zijwaartse witruimte van de Streamlit pagina op mobiel */
-    .block-container {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-        padding-top: 15px !important;
-        max-width: 100% !important;
-    }
-    
-    /* Dwing de container om exact 100% van de schermbreedte te pakken */
-    [data-testid="stVerticalBlock"] {
-        width: 100% !important;
-        padding: 0px !important;
-    }
-
-    /* FORCEER 4 KOLOMMEN NAAST ELKAAR (NOOIT ONDER ELKAAR) */
-    [data-testid="stHorizontalBlock"] {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        gap: 4px !important; 
-        width: 100% !important;
-        margin: 0px !important;
-        padding: 0px !important;
-    }
-    
-    /* Geef elke kolom exact een kwart van de beschikbare schermruimte */
-    [data-testid="column"] {
-        width: 25% !important;
-        flex: 1 1 25% !important;
-        min-width: 0px !important;
-        padding: 0px !important;
-        margin: 0px !important;
-    }
-
-    /* Maak de invoervakken compact en dwing ze binnen de kolom */
+    /* Maak de invoervelden groter en centreer de tekst (Uit jouw stabiele basis) */
     input {
-        font-size: 18px !important;
+        font-size: 24px !important;
         text-align: center !important;
-        height: 50px !important;
-        padding: 0px !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
+        height: 60px !important;
+        width: 100% !important; /* Zorgt dat het veld nooit buiten zijn kolom treedt */
     }
-    
-    /* Verwijder de pijltjes bij de getallen */
+    /* Verwijder de pijltjes (spinners) bij de getallen */
     input::-webkit-outer-spin-button,
     input::-webkit-inner-spin-button {
         -webkit-appearance: none;
         margin: 0;
     }
-
-    /* DE GELE CONTROLEKNOP */
-    div.stButton > button[kind="primary"] {
-        background-color: #FFDE00 !important;
-        color: #000000 !important;
-        border-color: #FFDE00 !important;
-        font-weight: bold !important;
-        font-size: 18px !important;
-        height: 50px !important;
-        margin-top: 15px;
+    
+    /* EFFICIËNTE MOBIELE FIX: Voorkom dat kolommen uit het scherm lopen in portrait */
+    [data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 4px !important; /* Compacte tussenruimte */
+        width: 100% !important;
+    }
+    [data-testid="column"] {
+        padding: 0px !important; /* Verwijdert de overtollige pixels die de boel naar rechts drukten */
+        min-width: 0px !important; /* Staat krimpen in portrait stand toe */
+        flex: 1 1 0% !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -79,7 +45,7 @@ st.write("Fill in the square. The first row automatically determines the target 
 
 st.write("---")
 
-# Het 4x4 raster
+# Het 4x4 raster - Geoptimaliseerd voor touch
 with st.container():
     inputs = []
     for r in range(4):
@@ -99,7 +65,7 @@ with st.container():
 
 st.write("---")
 
-# De knop
+# De knop (Uit jouw stabiele basis)
 if st.button("CHECK NOW", type="primary", use_container_width=True):
     veilig_inputs = [x if x is not None else 0 for x in inputs]
     matrix = [veilig_inputs[i:i+4] for i in range(0, 16, 4)]
@@ -121,12 +87,12 @@ if st.button("CHECK NOW", type="primary", use_container_width=True):
     diag2 = sum(matrix[i][3-i] for i in range(4))
 
     if diag1 != doelgetal:
-        foutmeldingen.append(f"❌ Diagonal (top left-bottom right) is incorrect. (Sum is {diag1})")
+        foutmeldingen.append(f"❌ Diagonal top-left to bottom-right is incorrect. (Sum is {diag1})")
     if diag2 != doelgetal:
-        foutmeldingen.append(f"❌ Diagonal (bottom left-top right) is incorrect. (Sum is {diag2})")
+        foutmeldingen.append(f"❌ Diagonal top-right to bottom-left is incorrect. (Sum is {diag2})")
 
     if not foutmeldingen:
-        st.success(f"🎉 Perfect. This square is magical in every way (Sum = {doelgetal})!")
+        st.success(f"🎉 Perfect! The square is magic (Sum = {doelgetal})!")
         st.balloons()
     else:
         for fout in foutmeldingen:
