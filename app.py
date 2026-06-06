@@ -30,10 +30,7 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 st.title("🪄 Magic Square Trainer V2")
-st.write("Welcome to the magic square trainer! Enter the numbers and the app will instantly check the logic.")
-
-# Doelgetal invoeren
-doelgetal = st.number_input("Doelgetal", min_value=1, value=34, step=1)
+st.write("Fill in the square. The first row automatically determines the target number against which it is checked.")
 
 st.write("---")
 
@@ -62,7 +59,12 @@ if st.button("CHECK NOW", type="primary", use_container_width=True):
     matrix = [inputs[i:i+4] for i in range(0, 16, 4)]
     foutmeldingen = []
 
-    # Check rijen en kolommen
+    # De allereerste rij (Rij 1) bepaalt de controle-uitkomst (het doelgetal)
+    doelgetal = sum(matrix[0])
+    
+    st.info(f"🎯 Controleren op basis van de eerste rij. Doelgetal is: **{doelgetal}**")
+
+    # Check alle rijen en kolommen
     for i in range(4):
         rij_som = sum(matrix[i])
         kolom_som = sum(matrix[r][i] for r in range(4))
