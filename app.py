@@ -7,50 +7,61 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Geoptimaliseerde CSS voor een perfect passend 4x4 raster op mobiel
+# Ultieme CSS-overrule om stapelen en uitlopen te voorkomen
 st.markdown("""
     <style>
-    /* Zorg dat de hoofdcontainer geen onnodige marges heeft op mobiel */
+    /* Verwijder alle zijwaartse witruimte van de Streamlit pagina op mobiel */
     .block-container {
-        padding-left: 10px !important;
-        padding-right: 10px !important;
-        padding-top: 20px !important;
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+        padding-top: 15px !important;
+        max-width: 100% !important;
     }
     
-    /* Maak de invoervelden compacter zodat ze NOOIT buiten het scherm lopen */
+    /* Dwing de container om exact 100% van de schermbreedte te pakken */
+    [data-testid="stVerticalBlock"] {
+        width: 100% !important;
+        padding: 0px !important;
+    }
+
+    /* FORCEER 4 KOLOMMEN NAAST ELKAAR (NOOIT ONDER ELKAAR) */
+    [data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 4px !important; 
+        width: 100% !important;
+        margin: 0px !important;
+        padding: 0px !important;
+    }
+    
+    /* Geef elke kolom exact een kwart van de beschikbare schermruimte */
+    [data-testid="column"] {
+        width: 25% !important;
+        flex: 1 1 25% !important;
+        min-width: 0px !important;
+        padding: 0px !important;
+        margin: 0px !important;
+    }
+
+    /* Maak de invoervakken compact en dwing ze binnen de kolom */
     input {
-        font-size: 20px !important;
+        font-size: 18px !important;
         text-align: center !important;
         height: 50px !important;
         padding: 0px !important;
-        width: 100% !important; /* Dwing het veld binnen zijn kolom te blijven */
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
     
-    /* Verwijder de pijltjes (spinners) bij de getallen */
+    /* Verwijder de pijltjes bij de getallen */
     input::-webkit-outer-spin-button,
     input::-webkit-inner-spin-button {
         -webkit-appearance: none;
         margin: 0;
     }
-    
-    /* FORCEER 4 KOLOMMEN STRAK NAAST ELKAAR */
-    [data-testid="stHorizontalBlock"] {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        gap: 4px !important; /* Kleine opening tussen de vakjes */
-        width: 100% !important;
-    }
-    
-    /* Verdeel de kolommen exact in vieren (25% minus een kleine marge voor de gap) */
-    [data-testid="column"] {
-        width: calc(25% - 3px) !important;
-        flex: 1 1 calc(25% - 3px) !important;
-        min-width: 0px !important;
-        padding: 0px !important;
-    }
 
-    /* HIER MAKEN WE DE CONTROLEKNOP GEEL */
+    /* DE GELE CONTROLEKNOP */
     div.stButton > button[kind="primary"] {
         background-color: #FFDE00 !important;
         color: #000000 !important;
@@ -60,13 +71,6 @@ st.markdown("""
         height: 50px !important;
         margin-top: 15px;
     }
-    div.stButton > button[kind="primary"]:hover, 
-    div.stButton > button[kind="primary"]:active, 
-    div.stButton > button[kind="primary"]:focus {
-        background-color: #E6C600 !important;
-        border-color: #E6C600 !important;
-        color: #000000 !important;
-    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -75,7 +79,7 @@ st.write("Fill in the square. The first row automatically determines the target 
 
 st.write("---")
 
-# Het 4x4 raster - Perfect passend op elk scherm
+# Het 4x4 raster
 with st.container():
     inputs = []
     for r in range(4):
