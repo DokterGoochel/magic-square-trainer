@@ -1,41 +1,61 @@
 import streamlit as st
 
-# Pagina-instellingen voor mobiel (Uit jouw stabiele basis)
 st.set_page_config(
     page_title="Magic Square Trainer", 
     layout="centered", 
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS gebaseerd op jouw stabiele versie, met de fix tegen het onder elkaar stapelen
 st.markdown("""
     <style>
-    /* Maak de invoervelden groter en centreer de tekst (Uit jouw basis) */
+    /* STANDAARD (DESKTOP & LANDSCAPE) - Jouw stabiele weergave */
     input {
         font-size: 24px !important;
         text-align: center !important;
         height: 60px !important;
+        width: 100% !important;
     }
-    /* Verwijder de pijltjes (spinners) bij de getallen */
     input::-webkit-outer-spin-button,
     input::-webkit-inner-spin-button {
         -webkit-appearance: none;
         margin: 0;
     }
     
-    /* DE FIXED LOGICA TEGEN HET VERTICAAL STAPELEN */
-    [data-testid="stHorizontalBlock"] {
-        display: flex !important;
-        flex-direction: row !important; /* Dwingt te allen tijde een horizontale rij af */
-        flex-wrap: nowrap !important;   /* Voorkomt dat kolommen naar een nieuwe regel springen */
-        gap: 6px !important;            /* Ruimte tussen de vakjes op mobiel */
-        width: 100% !important;
-    }
-    
-    [data-testid="column"] {
-        padding: 2px !important;         /* Iets compacter dan 5px zodat het makkelijker past */
-        min-width: 0px !important;       /* Strijkt de minimale breedte van Streamlit glad */
-        flex: 1 1 0% !important;        /* Verdeelt de kolommen exact gelijk over het scherm */
+    /* SPECIFIEKE FIX VOOR MOBIEL PORTRAIT (< 600px breed) */
+    @media (max-width: 600px) {
+        /* 1. Haal de uiterste zijranden van het scherm weg */
+        .block-container {
+            padding-left: 2px !important;
+            padding-right: 2px !important;
+        }
+        
+        /* 2. Dwing de horizontale rij af en maak de tussenruimte heel klein (2px) */
+        [data-testid="stHorizontalBlock"] {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            gap: 2px !important; 
+            width: 100% !important;
+        }
+        
+        /* 3. Dwing de kolommen om flexibel te krimpen */
+        [data-testid="column"] {
+            flex: 1 1 0% !important;
+            min-width: 0px !important;
+            padding: 0px !important;
+        }
+        
+        /* 4. DE ULTIEME OPLOSSING: Dwing ELK verborgen Streamlit-laagje om mee te krimpen */
+        [data-testid="column"] * {
+            min-width: 0px !important;
+        }
+        
+        /* 5. Maak het vakje en de tekst iets compacter zodat het fysiek in de breedte past */
+        input {
+            font-size: 18px !important;
+            height: 48px !important;
+            padding: 0px !important;
+        }
     }
     </style>
     """, unsafe_allow_html=True)
@@ -45,7 +65,7 @@ st.write("Fill in the square. The first row automatically determines the target 
 
 st.write("---")
 
-# Het 4x4 raster - Geoptimaliseerd voor touch
+# Het 4x4 raster 
 with st.container():
     inputs = []
     for r in range(4):
@@ -65,7 +85,7 @@ with st.container():
 
 st.write("---")
 
-# De knop (Uit jouw stabiele basis)
+# De knop
 if st.button("CHECK NOW", type="primary", use_container_width=True):
     veilig_inputs = [x if x is not None else 0 for x in inputs]
     matrix = [veilig_inputs[i:i+4] for i in range(0, 16, 4)]
