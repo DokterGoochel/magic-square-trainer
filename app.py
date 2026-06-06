@@ -7,7 +7,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS: Jouw exacte basis, maar met intelligente schermdetectie
+# Custom CSS: Jouw basis, uitgebreid met de blokkade tegen verticaal stapelen
 st.markdown("""
     <style>
     /* Maak de invoervelden groter en centreer de tekst (Uit jouw basis) */
@@ -23,26 +23,19 @@ st.markdown("""
         margin: 0;
     }
     
-    /* SLIMME SCHERMDETECTIE (MEDIA QUERY) */
-    /* Als het scherm breed is (Desktop / Landscape) -> Gebruik jouw originele padding */
-    @media (min-width: 600px) {
-        [data-testid="column"] {
-            padding: 5px !important;
-        }
+    /* DE FIX VOOR PORTRAIT: Forceer de kolommen om ALTIJD naast elkaar te blijven staan */
+    [data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        flex-direction: row !important; /* Dwingt een horizontale rij af, nooit verticaal */
+        flex-wrap: nowrap !important;   /* Voorkomt dat vakjes naar de volgende regel springen */
+        gap: 6px !important;            /* Ruimte tussen de kolommen op mobiel */
+        width: 100% !important;
     }
     
-    /* Als het scherm smal is (Mobiel Portrait) -> Krimp de marges om overflow te stoppen */
-    @media (max-width: 599px) {
-        .block-container {
-            padding-left: 6px !important;
-            padding-right: 6px !important;
-        }
-        [data-testid="stHorizontalBlock"] {
-            gap: 4px !important;
-        }
-        [data-testid="column"] {
-            padding: 0px !important; /* Verwijdert de 40px die het vierkant naar rechts drukten */
-        }
+    [data-testid="column"] {
+        flex: 1 1 0% !important;        /* Verdeelt de beschikbare ruimte exact gelijk */
+        min-width: 0px !important;       /* Staat toe dat de kolom smaller wordt dan de standaard */
+        padding: 0px !important;         /* Verwijdert extra marges die het scherm uitduwen */
     }
     </style>
     """, unsafe_allow_html=True)
@@ -98,6 +91,7 @@ if st.button("CHECK NOW", type="primary", use_container_width=True):
     if diag2 != doelgetal:
         foutmeldingen.append(f"❌ Diagonal top-right to bottom-left is incorrect. (Sum is {diag2})")
 
+    if not foutglow:
     if not foutmeldingen:
         st.success(f"🎉 Perfect! The square is magic (Sum = {doelgetal})!")
         st.balloons()
