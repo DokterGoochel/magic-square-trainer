@@ -62,7 +62,7 @@ if st.button("CHECK NOW", type="primary", use_container_width=True):
     # De allereerste rij (Rij 1) bepaalt de controle-uitkomst (het doelgetal)
     doelgetal = sum(matrix[0])
     
-    st.info(f"🎯 Controleren op basis van de eerste rij. Doelgetal is: **{doelgetal}**")
+    st.info(f"🎯 Check based on the first row. Target number is: **{doelgetal}**")
 
     # Check alle rijen en kolommen
     for i in range(4):
