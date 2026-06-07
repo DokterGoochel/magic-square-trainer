@@ -21,7 +21,7 @@ if 'reset' not in st.session_state: st.session_state.reset = 0
 # Keuze voor controle methode
 controle_methode = st.radio("Controle:", ["Automatisch (1e rij)", "Handmatig getal"])
 
-# DYNAMISCHE INVOER: Deze verschijnt alleen als je voor handmatig kiest
+# Dynamische invoer voor handmatig doelgetal
 doelgetal_handmatig = 0
 if controle_methode == "Handmatig getal":
     doelgetal_handmatig = st.number_input(
@@ -70,4 +70,6 @@ with col2:
             st.success(f"🎉 Perfect! De som is {int(doel)}.")
             st.balloons()
         else:
-            [st.error(f) for f in foutmeldingen]
+            # GEWIZIGD: Nette for-loop in plaats van list comprehension voorkomt de dropdown weergave
+            for fout in foutmeldingen:
+                st.error(fout)
