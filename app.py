@@ -24,10 +24,13 @@ controle_methode = st.radio("Controle:", ["Automatisch (1e rij)", "Handmatig get
 # Dynamische invoer voor handmatig doelgetal
 doelgetal_handmatig = 0
 if controle_methode == "Handmatig getal":
-    doelgetal_handmatig = st.number_input(
-        "Voer je doelgetal in:", min_value=0, step=1, format="%d", 
-        key=f"doel_{st.session_state.reset}"
-    )
+    # We plaatsen het invoerveld in een kant-en-klaar gekleurd kader
+    with st.container(border=True):
+        st.write("🔹 **Handmatige Controle**")
+        doelgetal_handmatig = st.number_input(
+            "Voer je doelgetal in:", min_value=0, step=1, format="%d", 
+            key=f"doel_{st.session_state.reset}"
+        )
 
 # Raster tekenen
 inputs = []
