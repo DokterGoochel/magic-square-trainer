@@ -19,15 +19,15 @@ st.title("🪄 Magic Square Trainer")
 if 'reset' not in st.session_state: st.session_state.reset = 0
 
 # Keuze voor controle methode
-controle_methode = st.radio("Controle:", ["Automatisch (1e rij)", "Handmatig getal"])
+controle_methode = st.radio("Target value:", ["Automatic (sum of first row)", "Manual input"])
 
 # Dynamische invoer voor handmatig doelgetal
 doelgetal_handmatig = 0
-if controle_methode == "Handmatig getal":
+if controle_methode == "Manual input":
     # Een strak kader zonder extra titels, alleen de invoerbalk
     with st.container(border=True):
         doelgetal_handmatig = st.number_input(
-            "Voer je doelgetal in:", min_value=0, step=1, format="%d", 
+            "Enter your target number:", min_value=0, step=1, format="%d", 
             key=f"doel_{st.session_state.reset}"
         )
 
@@ -54,7 +54,7 @@ with col2:
         matrix = [inputs[i:i+4] for i in range(0, 16, 4)]
         
         # Bepaal het doelgetal op basis van de gekozen methode
-        if controle_methode == "Automatisch (1e rij)":
+        if controle_methode == "Automatic (sum of first row)":
             doel = sum(matrix[0])
         else:
             doel = doelgetal_handmatig
@@ -63,13 +63,13 @@ with col2:
         
         foutmeldingen = []
         for i in range(4):
-            if sum(matrix[i]) != doel: foutmeldingen.append(f"❌ Rij {i+1} klopt niet.")
-            if sum(matrix[r][i] for r in range(4)) != doel: foutmeldingen.append(f"❌ Kolom {i+1} klopt niet.")
-        if sum(matrix[i][i] for i in range(4)) != doel: foutmeldingen.append("❌ Diagonaal 1 klopt niet.")
-        if sum(matrix[i][3-i] for i in range(4)) != doel: foutmeldingen.append("❌ Diagonaal 2 klopt niet.")
+            if sum(matrix[i]) != doel: foutmeldingen.append(f"❌ Row {i+1} is incorrect.")
+            if sum(matrix[r][i] for r in range(4)) != doel: foutmeldingen.append(f"❌ Column {i+1} is incorrect.")
+        if sum(matrix[i][i] for i in range(4)) != doel: foutmeldingen.append("❌ Diagonal (top left-bottom right) is incorrect.")
+        if sum(matrix[i][3-i] for i in range(4)) != doel: foutmeldingen.append("❌ Diagonal (bottom left-top right) is incorrect.")
         
         if not foutmeldingen:
-            st.success(f"🎉 Perfect! De som is {int(doel)}.")
+            st.success(f"🎉 Perfect. This square is magical in every way. It all adds up to {int(doel)}.")
             st.balloons()
         else:
             # GEWIZIGD: Nette for-loop in plaats van list comprehension voorkomt de dropdown weergave
