@@ -16,7 +16,10 @@ st.markdown("""
 
 st.title("🪄 Magic Square Trainer")
 
-# Initialiseer dataframe met gehele getallen (0)
+# Initialiseer de reset-teller en het basissquare
+if 'reset' not in st.session_state: 
+    st.session_state.reset = 0
+
 def reset_grid():
     st.session_state.magic_grid = pd.DataFrame(
         [[0] * 4 for _ in range(4)],
@@ -25,10 +28,8 @@ def reset_grid():
 
 if 'magic_grid' not in st.session_state:
     reset_grid()
-if 'reset' not in st.session_state: 
-    st.session_state.reset = 0
 
-# Keuze voor controle methode (Engels)
+# Keuze voor controle methode
 controle_methode = st.radio("Target value:", ["Automatic (sum of first row)", "Manual input"])
 
 # Dynamische invoer voor handmatig doelgetal met een strak kader
@@ -40,11 +41,13 @@ if controle_methode == "Manual input":
             key=f"doel_{st.session_state.reset}"
         )
 
-# Data editor voor gehele getallen geoptimaliseerd voor mobiel
+# GEWIJZIGD: De key is nu dynamisch (gekoppeld aan st.session_state.reset)
+# Dit dwingt de tabel om écht leeg te worden bij 'Delete All'
 edited_df = st.data_editor(
     st.session_state.magic_grid, 
     hide_index=True, 
     use_container_width=True,
+    key=f"grid_{st.session_state.reset}",
     column_config={col: st.column_config.NumberColumn(label="", min_value=0, max_value=999, step=1, format="%d") 
                    for col in st.session_state.magic_grid.columns}
 )
@@ -52,8 +55,8 @@ edited_df = st.data_editor(
 col1, col2 = st.columns(2)
 with col1:
     if st.button("🗑️ Delete All"):
-        reset_grid()
-        st.session_state.reset += 1
+        reset_grid()                  # Zet de basis-data in de sessie op 0
+        st.session_state.reset += 1   # Verhoog de teller om de tabel-widget te dwingen te resetten
         st.rerun()
 
 with col2:
@@ -80,6 +83,5 @@ with col2:
             st.success(f"🎉 Perfect. This square is magical in every way. It all adds up to {int(doel)}.")
             st.balloons()
         else:
-            # Schone for-loop voorkomt de dropdown-fout op mobiel
             for fout in foutmeldingen:
                 st.error(fout)
