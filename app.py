@@ -2,13 +2,21 @@ import streamlit as st
 
 st.set_page_config(page_title="Magic Square Trainer", layout="centered")
 
-# CSS voor de gele knop
+# CSS voor de visuele styling
 st.markdown("""
     <style>
+    /* 1. Maak de Check Now knop mooi geel */
     div.stButton > button[kind="primary"] {
         background-color: #FFDE00 !important;
         color: #000000 !important;
         border: 2px solid #FFDE00 !important;
+    }
+    
+    /* 2. Geef specifiek het doelgetal-invoerveld een lichtgele achtergrond */
+    div[data-testid="stNumberInput"] div[data-custom-marker="doelgetal"] input {
+        background-color: #FFF9C4 !important;
+        border: 1px solid #FBC02D !important;
+        font-weight: bold !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -19,15 +27,19 @@ st.title("🪄 Magic Square Trainer")
 if 'reset' not in st.session_state: st.session_state.reset = 0
 
 # Keuze voor controle methode
-controle_methode = st.radio("Target number:", ["Automatic (sum of first row)", "Manual input"])
+controle_methode = st.radio("Controle:", ["Automatisch (1e rij)", "Handmatig getal"])
 
 # Dynamische invoer voor handmatig doelgetal
 doelgetal_handmatig = 0
-if controle_methode == "Manual input":
-    doelgetal_handmatig = st.number_input(
-        "Enter the target number:", min_value=0, step=1, format="%d", 
-        key=f"doel_{st.session_state.reset}"
-    )
+if controle_methode == "Handmatig getal":
+    # We verpakken dit specifieke veld in een container om het met CSS te kunnen kleuren
+    with st.container():
+        st.markdown('<div data-custom-marker="doelgetal">', unsafe_allow_html=True)
+        doelgetal_handmatig = st.number_input(
+            "Voer je doelgetal in:", min_value=0, step=1, format="%d", 
+            key=f"doel_{st.session_state.reset}"
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # Raster tekenen
 inputs = []
@@ -51,7 +63,6 @@ with col2:
     if st.button("CHECK NOW", type="primary"):
         matrix = [inputs[i:i+4] for i in range(0, 16, 4)]
         
-        # Bepaal het doelgetal op basis van de gekozen methode
         if controle_methode == "Automatisch (1e rij)":
             doel = sum(matrix[0])
         else:
@@ -61,15 +72,14 @@ with col2:
         
         foutmeldingen = []
         for i in range(4):
-            if sum(matrix[i]) != doel: foutmeldingen.append(f"❌ Row {i+1} is incorrect.")
-            if sum(matrix[r][i] for r in range(4)) != doel: foutmeldingen.append(f"❌ Column {i+1} is incorrect.")
-        if sum(matrix[i][i] for i in range(4)) != doel: foutmeldingen.append("❌ Diagonal (top left-bottom right) is incorrect.")
-        if sum(matrix[i][3-i] for i in range(4)) != doel: foutmeldingen.append("❌ Diagonal (bottom left-top right) is incorrect.")
+            if sum(matrix[i]) != doel: foutmeldingen.append(f"❌ Rij {i+1} klopt niet.")
+            if sum(matrix[r][i] for r in range(4)) != doel: foutmeldingen.append(f"❌ Kolom {i+1} klopt niet.")
+        if sum(matrix[i][i] for i in range(4)) != doel: foutmeldingen.append("❌ Diagonaal 1 klopt niet.")
+        if sum(matrix[i][3-i] for i in range(4)) != doel: foutmeldingen.append("❌ Diagonaal 2 klopt niet.")
         
         if not foutmeldingen:
-            st.success(f"🎉 Perfect. This square is magical in every way. It all adds up to {int(doel)}.")
+            st.success(f"🎉 Perfect! De som is {int(doel)}.")
             st.balloons()
         else:
-            # GEWIZIGD: Nette for-loop in plaats van list comprehension voorkomt de dropdown weergave
             for fout in foutmeldingen:
                 st.error(fout)
