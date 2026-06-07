@@ -25,7 +25,7 @@ controle_methode = st.radio("Target number:", ["Automatic (sum of first row)", "
 doelgetal_handmatig = 0
 if controle_methode == "Manual input":
     doelgetal_handmatig = st.number_input(
-        "Voer je doelgetal in:", min_value=0, step=1, format="%d", 
+        "Enter the target number:", min_value=0, step=1, format="%d", 
         key=f"doel_{st.session_state.reset}"
     )
 
