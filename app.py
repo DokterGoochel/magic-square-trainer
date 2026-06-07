@@ -2,13 +2,22 @@ import streamlit as st
 
 st.set_page_config(page_title="Magic Square Trainer", layout="centered")
 
-# CSS voor de gele knop
+# CSS voor de gele knop én grotere cijfers in het vierkant
 st.markdown("""
     <style>
+    /* 1. Maak de Check Now knop mooi geel */
     div.stButton > button[kind="primary"] {
         background-color: #FFDE00 !important;
         color: #000000 !important;
         border: 2px solid #FFDE00 !important;
+    }
+    
+    /* 2. Vergroot de tekst/cijfers in de invoervelden van het magische vierkant */
+    div[data-testid="stNumberInput"] input {
+        font-size: 24px !important;    /* Pas dit getal aan voor groter/kleiner (standaard is ~16px) */
+        font-weight: bold !important;  /* Maakt de cijfers dikgedrukt voor betere zichtbaarheid */
+        text-align: center !important; /* Zet het getal netjes in het midden van het vakje */
+        height: 45px !important;       /* Maakt het vakje zelf iets hoger zodat het grote cijfer goed past */
     }
     </style>
     """, unsafe_allow_html=True)
