@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(page_title="Magic Square Trainer", layout="centered")
 
-# We halen de ingewikkelde CSS voor de invoervelden weg en behouden alleen de gele knop
+# CSS voor de gele knop
 st.markdown("""
     <style>
     div.stButton > button[kind="primary"] {
@@ -24,26 +24,12 @@ controle_methode = st.radio("Controle:", ["Automatisch (1e rij)", "Handmatig get
 # Dynamische invoer voor handmatig doelgetal
 doelgetal_handmatig = 0
 if controle_methode == "Handmatig getal":
-    # TRUC: We dwingen via een gerichte inline stijl specifiek DIT blok naar een gele achtergrond
-    st.markdown("""
-        <style>
-        /* We zoeken het invoerveld dat direct volgt op de radioknop */
-        div[data-testid="stWidgetFormSubmitButton"] {  } /* negeer knoppen */
-        .stRadio + div div[data-testid="stNumberInput"] input {
-            background-color: #FFF9C4 !important;
-            border: 2px solid #FBC02D !important;
-            font-weight: bold !important;
-            color: #000000 !important;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-    
     doelgetal_handmatig = st.number_input(
         "Voer je doelgetal in:", min_value=0, step=1, format="%d", 
         key=f"doel_{st.session_state.reset}"
     )
 
-# Raster tekenen (deze behouden nu hun eigen, standaard grijze look)
+# Raster tekenen
 inputs = []
 for r in range(4):
     cols = st.columns(4)
@@ -65,6 +51,7 @@ with col2:
     if st.button("CHECK NOW", type="primary"):
         matrix = [inputs[i:i+4] for i in range(0, 16, 4)]
         
+        # Bepaal het doelgetal op basis van de gekozen methode
         if controle_methode == "Automatisch (1e rij)":
             doel = sum(matrix[0])
         else:
@@ -83,5 +70,6 @@ with col2:
             st.success(f"🎉 Perfect! De som is {int(doel)}.")
             st.balloons()
         else:
+            # GEWIZIGD: Nette for-loop in plaats van list comprehension voorkomt de dropdown weergave
             for fout in foutmeldingen:
                 st.error(fout)
