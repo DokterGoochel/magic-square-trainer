@@ -12,12 +12,18 @@ st.markdown("""
         border: 2px solid #FFDE00 !important;
     }
     
-    /* 2. Alternatieve methode: Kleur het invoerveld dat een label heeft */
-    div[data-testid="stNumberInput"] label + div input {
+    /* 2. Zorg dat ALLE invoervelden standaard de normale grijze achtergrond behouden */
+    div[data-testid="stNumberInput"] input {
+        background-color: #f0f2f6 !important;
+        color: #31333F !important;
+        border: 1px solid #d3d3d3 !important;
+    }
+    
+    /* 3. Alleen als het handmatige invoerveld actief is, krijgt dit specifieke veld een gele tint */
+    .stNumberInput:first-of-type input {
         background-color: #FFF9C4 !important;
         border: 2px solid #FBC02D !important;
         font-weight: bold !important;
-        color: #000000 !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -33,7 +39,6 @@ controle_methode = st.radio("Controle:", ["Automatisch (1e rij)", "Handmatig get
 # Dynamische invoer voor handmatig doelgetal
 doelgetal_handmatig = 0
 if controle_methode == "Handmatig getal":
-    # De HTML-divs zijn hier weggehaald; pure Streamlit code
     doelgetal_handmatig = st.number_input(
         "Voer je doelgetal in:", min_value=0, step=1, format="%d", 
         key=f"doel_{st.session_state.reset}"
