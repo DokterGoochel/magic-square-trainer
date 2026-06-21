@@ -4,7 +4,7 @@ from datetime import date, timedelta
 
 st.set_page_config(page_title="Magic Square Trainer", layout="centered")
 
-# CSS voor styling én de mobiele grid-fix
+# CSS voor styling
 st.markdown("""
     <style>
     /* 1. Maak de Check Now knop mooi geel */
@@ -35,15 +35,13 @@ st.markdown("""
     [data-testid="stHorizontalBlock"] {
         flex-direction: row !important;
         flex-wrap: nowrap !important;
-        gap: 5px !important; /* Voorkom dat vakjes te veel tegen elkaar plakken op smalle schermen */
+        gap: 5px !important;
     }
     
-    /* Zorg dat alle 4 de kolommen evenveel ruimte (25%) krijgen */
     [data-testid="column"] {
         min-width: 20% !important; 
     }
     
-    /* Extra: optimaliseer de schermmarges op mobiel zodat het vierkant goed past */
     @media (max-width: 640px) {
         .block-container {
             padding-left: 1rem !important;
@@ -55,7 +53,7 @@ st.markdown("""
 
 st.title("🪄 Magic Square Trainer")
 
-# Helper functies om willekeurige data en getallen te genereren
+# Helper functies
 def genereer_random_datum():
     start_date = date(1900, 1, 1)
     end_date = date.today()
@@ -74,7 +72,7 @@ if 'random_date' not in st.session_state:
 if 'random_target' not in st.session_state:
     st.session_state.random_target = genereer_random_getal()
 
-# Keuze voor controle methode (Met aangepaste tekst)
+# Keuze voor controle methode
 controle_methode = st.radio(
     "Target value:", 
     ["Automatic (sum of first row)", "Manual input", "Random Date (01/01/1900 - Today)", "Random Number (22-99)"]
@@ -90,4 +88,28 @@ if controle_methode == "Manual input":
             key=f"doel_{st.session_state.reset}"
         )
 
-elif controle_methode
+elif controle_methode == "Random Date (01/01/1900 - Today)":
+    with st.container(border=True):
+        datum_string = st.session_state.random_date.strftime("%d/%m/%Y")
+        st.markdown(f"<div class='large-display'>{datum_string}</div>", unsafe_allow_html=True)
+        
+        dag = st.session_state.random_date.day
+        maand = st.session_state.random_date.month
+        jaar_volledig = st.session_state.random_date.year
+        
+        eeuw = jaar_volledig // 100       
+        jaar_kort = jaar_volledig % 100    
+        
+        doelgetal_datum = dag + maand + eeuw + jaar_kort
+
+elif controle_methode == "Random Number (22-99)":
+    with st.container(border=True):
+        st.markdown(f"<div class='large-display'>{st.session_state.random_target}</div>", unsafe_allow_html=True)
+
+# Raster tekenen
+inputs = []
+for r in range(4):
+    cols = st.columns(4)
+    for c in range(4):
+        val = cols[c].number_input(
+            f"R{r}
