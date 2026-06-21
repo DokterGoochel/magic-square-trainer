@@ -4,7 +4,7 @@ from datetime import date, timedelta
 
 st.set_page_config(page_title="Magic Square Trainer", layout="centered")
 
-# CSS voor styling
+# CSS voor de gele knop én grotere cijfers in het vierkant
 st.markdown("""
     <style>
     /* 1. Maak de Check Now knop mooi geel */
@@ -20,15 +20,6 @@ st.markdown("""
         font-weight: bold !important;
         text-align: center !important;
         height: 45px !important;
-    }
-    
-    /* 3. Maak de weergave van Random Date en Number groot en gecentreerd */
-    .large-display {
-        font-size: 28px;
-        font-weight: bold;
-        text-align: center;
-        color: #31333F;
-        margin-bottom: 5px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -63,27 +54,29 @@ controle_methode = st.radio(
 doelgetal_handmatig = 0
 doelgetal_datum = 0
 
-# Weergave per methode
+# Logica voor de gekozen methode
 if controle_methode == "Manual input":
     with st.container(border=True):
         doelgetal_handmatig = st.number_input(
             "Enter your target number:", min_value=0, step=1, format="%d", 
             key=f"doel_{st.session_state.reset}"
         )
+
 elif controle_methode == "Random Date (01/01/1900 - Today)":
     with st.container(border=True):
         datum_string = st.session_state.random_date.strftime("%d/%m/%Y")
-        st.markdown(f"<div class='large-display'>{datum_string}</div>", unsafe_allow_html=True)
-        # Berekening (onzichtbaar)
+        st.write(f"### {datum_string}")
+        # Berekening (onzichtbaar voor de gebruiker)
         dag = st.session_state.random_date.day
         maand = st.session_state.random_date.month
         jaar_volledig = st.session_state.random_date.year
         doelgetal_datum = dag + maand + (jaar_volledig // 100) + (jaar_volledig % 100)
+
 elif controle_methode == "Random Number (22-99)":
     with st.container(border=True):
-        st.markdown(f"<div class='large-display'>{st.session_state.random_target}</div>", unsafe_allow_html=True)
+        st.write(f"### {st.session_state.random_target}")
 
-# Raster tekenen (de beproefde methode)
+# Raster tekenen
 inputs = []
 for r in range(4):
     cols = st.columns(4)
@@ -99,7 +92,7 @@ col1, col2 = st.columns(2)
 with col1:
     if st.button("🗑️ Delete All"):
         st.session_state.reset += 1
-        st.session_state.random_date = genereer_random_datum() 
+        st.session_state.random_date = genereer_random_datum()
         st.session_state.random_target = genereer_random_getal()
         st.rerun()
 
@@ -107,6 +100,7 @@ with col2:
     if st.button("CHECK NOW", type="primary"):
         matrix = [inputs[i:i+4] for i in range(0, 16, 4)]
         
+        # Bepaal het doelgetal
         if controle_methode == "Automatic (sum of first row)":
             doel = sum(matrix[0])
         elif controle_methode == "Manual input":
