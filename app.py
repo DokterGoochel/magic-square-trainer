@@ -4,22 +4,38 @@ from datetime import date, timedelta
 
 st.set_page_config(page_title="Magic Square Trainer", layout="centered")
 
-# CSS voor de gele knop én grotere cijfers in het vierkant
+# CSS voor styling
 st.markdown("""
     <style>
-    /* 1. Maak de Check Now knop mooi geel */
+    /* 1. Vergroten van alle labels (zoals 'Target value:') */
+    label {
+        font-size: 20px !important;
+    }
+
+    /* 2. Vergroten van de tekst in de radio-opties */
+    div[role="radiogroup"] label {
+        font-size: 18px !important;
+    }
+
+    /* 3. Vergroten van tekst in buttons (Delete All / Check Now) */
+    div.stButton button {
+        font-size: 18px !important;
+        font-weight: bold !important;
+    }
+
+    /* 4. Maak de Check Now knop specifiek geel */
     div.stButton > button[kind="primary"] {
         background-color: #FFDE00 !important;
         color: #000000 !important;
         border: 2px solid #FFDE00 !important;
     }
     
-    /* 2. Vergroot de tekst/cijfers in de invoervelden van het magische vierkant */
+    /* 5. Vergroot de cijfers in de invoervelden van het magische vierkant */
     div[data-testid="stNumberInput"] input {
-        font-size: 24px !important;    /* Pas dit getal aan voor groter/kleiner (standaard is ~16px) */
-        font-weight: bold !important;  /* Maakt de cijfers dikgedrukt voor betere zichtbaarheid */
-        text-align: center !important; /* Zet het getal netjes in het midden van het vakje */
-        height: 45px !important;       /* Maakt het vakje zelf iets hoger zodat het grote cijfer goed past */
+        font-size: 24px !important;    
+        font-weight: bold !important;  
+        text-align: center !important; 
+        height: 45px !important;       
     }
     </style>
     """, unsafe_allow_html=True)
@@ -103,7 +119,7 @@ with col2:
         else:
             doel = doelgetal_random
         
-        st.info(f"🎯 Doel: **{int(doel)}**")
+        st.info(f"🎯 Target: **{int(doel)}**")
         
         foutmeldingen = []
         for i in range(4):
