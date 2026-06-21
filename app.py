@@ -4,28 +4,6 @@ from datetime import date, timedelta
 
 st.set_page_config(page_title="Magic Square Trainer", layout="centered")
 
-# CSS voor de gele knop én grotere cijfers in het vierkant
-st.markdown("""
-    <style>
-    /* 1. Maak de Check Now knop mooi geel */
-    div.stButton > button[kind="primary"] {
-        background-color: #FFDE00 !important;
-        color: #000000 !important;
-        border: 2px solid #FFDE00 !important;
-    }
-    
-    /* 2. Vergroot de tekst/cijfers in de invoervelden van het magische vierkant */
-    div[data-testid="stNumberInput"] input {
-        font-size: 24px !important;    /* Pas dit getal aan voor groter/kleiner (standaard is ~16px) */
-        font-weight: bold !important;  /* Maakt de cijfers dikgedrukt voor betere zichtbaarheid */
-        text-align: center !important; /* Zet het getal netjes in het midden van het vakje */
-        height: 45px !important;       /* Maakt het vakje zelf iets hoger zodat het grote cijfer goed past */
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-st.title("🪄 Magic Square Trainer")
-
 # Helper functies
 def genereer_random_datum():
     start_date = date(1900, 1, 1)
@@ -38,6 +16,49 @@ def genereer_random_datum():
 if 'reset' not in st.session_state: st.session_state.reset = 0
 if 'random_date' not in st.session_state: st.session_state.random_date = genereer_random_datum()
 if 'random_target' not in st.session_state: st.session_state.random_target = random.randint(22, 99)
+if 'font_size' not in st.session_state: st.session_state.font_size = 18 # Standaard net iets groter gezet
+
+# Lettergrootte bediening (kleine knoppen bovenaan)
+col_a, col_b, col_space = st.columns([1, 1, 6])
+with col_a:
+    if st.button("A-"):
+        st.session_state.font_size -= 2
+with col_b:
+    if st.button("A+"):
+        st.session_state.font_size += 2
+
+# CSS (inclusief dynamische f-string voor de lettergrootte)
+# Let op: de accolades in de CSS moeten dubbel {{ }} zijn bij gebruik van een f-string
+st.markdown(f"""
+    <style>
+    /* Dynamische lettergrootte voor algemene teksten, labels en radiobuttons */
+    p, label, div[data-baseweb="radio"] div {{
+        font-size: {st.session_state.font_size}px !important;
+    }}
+    
+    /* Zorg dat de tekst in de Delete / Check Now knoppen ook meeschaalt */
+    div.stButton > button {{
+        font-size: {st.session_state.font_size}px !important;
+    }}
+
+    /* 1. Maak de Check Now knop mooi geel */
+    div.stButton > button[kind="primary"] {{
+        background-color: #FFDE00 !important;
+        color: #000000 !important;
+        border: 2px solid #FFDE00 !important;
+    }}
+    
+    /* 2. Vergroot de tekst/cijfers in de invoervelden van het magische vierkant */
+    div[data-testid="stNumberInput"] input {{
+        font-size: 24px !important;    /* Pas dit getal aan voor groter/kleiner (standaard is ~16px) */
+        font-weight: bold !important;  /* Maakt de cijfers dikgedrukt voor betere zichtbaarheid */
+        text-align: center !important; /* Zet het getal netjes in het midden van het vakje */
+        height: 45px !important;       /* Maakt het vakje zelf iets hoger zodat het grote cijfer goed past */
+    }}
+    </style>
+    """, unsafe_allow_html=True)
+
+st.title("🪄 Magic Square Trainer")
 
 # Keuze voor controle methode
 controle_methode = st.radio("Target value:", ["Automatic (sum of first row)", "Manual input", "Random Date (01/01/1900 - Today)", "Random Number (22-99)"])
