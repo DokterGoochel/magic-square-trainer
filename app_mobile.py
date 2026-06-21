@@ -1,32 +1,37 @@
 import streamlit as st
+import pandas as pd
 import random
 from datetime import date, timedelta
 
 st.set_page_config(page_title="Magic Square Trainer", layout="centered")
 
-# CSS voor de gele knop én grotere cijfers in het vierkant
+# CSS styling
 st.markdown("""
     <style>
-    /* 1. Maak de Check Now knop mooi geel */
     div.stButton > button[kind="primary"] {
         background-color: #FFDE00 !important;
         color: #000000 !important;
         border: 2px solid #FFDE00 !important;
     }
-    
-    /* 2. Vergroot de tekst/cijfers in de invoervelden van het magische vierkant */
-    div[data-testid="stNumberInput"] input {
-        font-size: 24px !important;    /* Pas dit getal aan voor groter/kleiner (standaard is ~16px) */
-        font-weight: bold !important;  /* Maakt de cijfers dikgedrukt voor betere zichtbaarheid */
-        text-align: center !important; /* Zet het getal netjes in het midden van het vakje */
-        height: 45px !important;       /* Maakt het vakje zelf iets hoger zodat het grote cijfer goed past */
+    .large-display {
+        font-size: 28px;
+        font-weight: bold;
+        text-align: center;
+        color: #31333F;
+        margin-bottom: 5px;
     }
     </style>
     """, unsafe_allow_html=True)
 
 st.title("🪄 Magic Square Trainer")
 
-# Helper functies
+# Helper functies voor de random generatoren
+def reset_grid():
+    st.session_state.magic_grid = pd.DataFrame(
+        [[0] * 4 for _ in range(4)],
+        columns=["", " ", "  ", "   "]
+    )
+
 def genereer_random_datum():
     start_date = date(1900, 1, 1)
     end_date = date.today()
@@ -34,20 +39,24 @@ def genereer_random_datum():
     random_dagen = random.randrange(verschil_dagen)
     return start_date + timedelta(days=random_dagen)
 
+def genereer_random_getal():
+    return random.randint(22, 99)
+
 # Sessie-beheer
+if 'magic_grid' not in st.session_state: reset_grid()
 if 'reset' not in st.session_state: st.session_state.reset = 0
 if 'random_date' not in st.session_state: st.session_state.random_date = genereer_random_datum()
-if 'random_target' not in st.session_state: st.session_state.random_target = random.randint(22, 99)
+if 'random_target' not in st.session_state: st.session_state.random_target = genereer_random_getal()
 
-# Keuze voor controle methode
-controle_methode = st.radio("Target value:", ["Automatic (sum of first row)", "Manual input", "Random Date (01/01/1900 - Today)", "Random Number (22-99)"])
+# Keuze voor controle methode (4 opties)
+controle_methode = st.radio(
+    "Target value:", 
+    ["Automatic (sum of first row)", "Manual input", "Random Date", "Random Number (22-99)"]
+)
 
-# Variabelen voor de doelgetallen
 doelgetal_handmatig = 0
 doelgetal_datum = 0
-doelgetal_random = st.session_state.random_target
 
-# Dynamische weergave per methode
 if controle_methode == "Manual input":
     with st.container(border=True):
         doelgetal_handmatig = st.number_input(
@@ -55,55 +64,59 @@ if controle_methode == "Manual input":
             key=f"doel_{st.session_state.reset}"
         )
 
-elif controle_methode == "Random Date (01/01/1900 - Today)":
+elif controle_methode == "Random Date":
     with st.container(border=True):
         datum_string = st.session_state.random_date.strftime("%d/%m/%Y")
-        st.write(f"### {datum_string}")
-        # Berekening
-        d = st.session_state.random_date.day
-        m = st.session_state.random_date.month
-        y = st.session_state.random_date.year
-        doelgetal_datum = d + m + (y // 100) + (y % 100)
+        st.markdown(f"<div class='large-display'>{datum_string}</div>", unsafe_allow_html=True)
+        
+        # Berekening van de controlesom (onzichtbaar)
+        dag = st.session_state.random_date.day
+        maand = st.session_state.random_date.month
+        jaar_volledig = st.session_state.random_date.year
+        
+        eeuw = jaar_volledig // 100
+        jaar_kort = jaar_volledig % 100
+        
+        doelgetal_datum = dag + maand + eeuw + jaar_kort
 
 elif controle_methode == "Random Number (22-99)":
     with st.container(border=True):
-        st.write(f"### {doelgetal_random}")
+        st.markdown(f"<div class='large-display'>{st.session_state.random_target}</div>", unsafe_allow_html=True)
 
-# Raster tekenen
-inputs = []
-for r in range(4):
-    cols = st.columns(4)
-    for c in range(4):
-        val = cols[c].number_input(
-            f"R{r}K{c}", value=0, 
-            key=f"c{r}{c}_{st.session_state.reset}", 
-            label_visibility="collapsed", format="%d"
-        )
-        inputs.append(int(val))
+# Mobielvriendelijke tabel (data editor)
+edited_df = st.data_editor(
+    st.session_state.magic_grid, 
+    hide_index=True, 
+    use_container_width=True,
+    key=f"grid_{st.session_state.reset}",
+    column_config={col: st.column_config.NumberColumn(label="", min_value=0, max_value=999, step=1, format="%d") 
+                   for col in st.session_state.magic_grid.columns}
+)
 
 col1, col2 = st.columns(2)
 with col1:
     if st.button("🗑️ Delete All"):
+        reset_grid()
         st.session_state.reset += 1
-        st.session_state.random_date = genereer_random_datum()
-        st.session_state.random_target = random.randint(22, 99)
+        st.session_state.random_date = genereer_random_datum() 
+        st.session_state.random_target = genereer_random_getal()
         st.rerun()
 
 with col2:
     if st.button("CHECK NOW", type="primary"):
-        matrix = [inputs[i:i+4] for i in range(0, 16, 4)]
+        # Dwing matrix om naar pure integers te gaan
+        matrix = edited_df.fillna(0).astype(int).values.tolist()
         
-        # Bepaal het doelgetal
         if controle_methode == "Automatic (sum of first row)":
             doel = sum(matrix[0])
         elif controle_methode == "Manual input":
             doel = doelgetal_handmatig
-        elif controle_methode == "Random Date (01/01/1900 - Today)":
+        elif controle_methode == "Random Date":
             doel = doelgetal_datum
-        else:
-            doel = doelgetal_random
+        else: # Random Number (22-99)
+            doel = st.session_state.random_target
         
-        st.info(f"🎯 Doel: **{int(doel)}**")
+        st.info(f"🎯 Target: **{int(doel)}**")
         
         foutmeldingen = []
         for i in range(4):
