@@ -1,39 +1,44 @@
 import streamlit as st
-import pandas as pd
+from datetime import date
 
 st.set_page_config(page_title="Magic Square Trainer", layout="centered")
 
-# CSS voor de gele knop
+# CSS voor de gele knop én grotere cijfers in het vierkant
 st.markdown("""
     <style>
+    /* 1. Maak de Check Now knop mooi geel */
     div.stButton > button[kind="primary"] {
         background-color: #FFDE00 !important;
         color: #000000 !important;
         border: 2px solid #FFDE00 !important;
+    }
+    
+    /* 2. Vergroot de tekst/cijfers in de invoervelden van het magische vierkant */
+    div[data-testid="stNumberInput"] input {
+        font-size: 24px !important;
+        font-weight: bold !important;
+        text-align: center !important;
+        height: 45px !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
 st.title("🪄 Magic Square Trainer")
 
-# Initialiseer de reset-teller en het basissquare
-if 'reset' not in st.session_state: 
-    st.session_state.reset = 0
+# Sessie-beheer
+if 'reset' not in st.session_state: st.session_state.reset = 0
 
-def reset_grid():
-    st.session_state.magic_grid = pd.DataFrame(
-        [[0] * 4 for _ in range(4)],
-        columns=["", " ", "  ", "   "]
-    )
+# Keuze voor controle methode (Nu met 3 opties)
+controle_methode = st.radio(
+    "Target value:", 
+    ["Automatic (sum of first row)", "Manual input", "Date input"]
+)
 
-if 'magic_grid' not in st.session_state:
-    reset_grid()
-
-# Keuze voor controle methode
-controle_methode = st.radio("Target value:", ["Automatic (sum of first row)", "Manual input"])
-
-# Dynamische invoer voor handmatig doelgetal met een strak kader
+# Initialiseer de variabelen voor het doelgetal
 doelgetal_handmatig = 0
+doelgetal_datum = 0
+
+# OPTIE 1: Handmatige invoer
 if controle_methode == "Manual input":
     with st.container(border=True):
         doelgetal_handmatig = st.number_input(
@@ -41,34 +46,60 @@ if controle_methode == "Manual input":
             key=f"doel_{st.session_state.reset}"
         )
 
-# GEWIJZIGD: De key is nu dynamisch (gekoppeld aan st.session_state.reset)
-# Dit dwingt de tabel om écht leeg te worden bij 'Delete All'
-edited_df = st.data_editor(
-    st.session_state.magic_grid, 
-    hide_index=True, 
-    use_container_width=True,
-    key=f"grid_{st.session_state.reset}",
-    column_config={col: st.column_config.NumberColumn(label="", min_value=0, max_value=999, step=1, format="%d") 
-                   for col in st.session_state.magic_grid.columns}
-)
+# OPTIE 2: Datum invoer (Nieuw!)
+elif controle_methode == "Date input":
+    with st.container(border=True):
+        # Invoerveld voor datum: van 01-01-1900 tot vandaag
+        gekozen_datum = st.date_input(
+            "Select a date:",
+            value=date(1980, 1, 1), # Standaard startwaarde in de kalender
+            min_value=date(1900, 1, 1),
+            max_value=date.today(),
+            key=f"datum_{st.session_state.reset}"
+        )
+        
+        # Berekening van de controlesom volgens jouw formule
+        dag = gekozen_datum.day
+        maand = gekozen_datum.month
+        jaar_volledig = gekozen_datum.year
+        
+        eeuw = jaar_volledig // 100       # Eerste twee cijfers van het jaartal (bijv. 19)
+        jaar_kort = jaar_volledig % 100    # Laatste twee cijfers van het jaartal (bijv. 84)
+        
+        doelgetal_datum = dag + maand + eeuw + jaar_kort
+        
+        # Subtiele visuele controle voor jezelf zodat je de som direct ziet
+        st.caption(f"Calculation: {dag} + {maand} + {eeuw} + {jaar_kort} = **{doelgetal_datum}**")
+
+# Raster tekenen
+inputs = []
+for r in range(4):
+    cols = st.columns(4)
+    for c in range(4):
+        val = cols[c].number_input(
+            f"R{r}K{c}", value=0, 
+            key=f"c{r}{c}_{st.session_state.reset}", 
+            label_visibility="collapsed", format="%d"
+        )
+        inputs.append(int(val))
 
 col1, col2 = st.columns(2)
 with col1:
     if st.button("🗑️ Delete All"):
-        reset_grid()                  # Zet de basis-data in de sessie op 0
-        st.session_state.reset += 1   # Verhoog de teller om de tabel-widget te dwingen te resetten
+        st.session_state.reset += 1
         st.rerun()
 
 with col2:
     if st.button("CHECK NOW", type="primary"):
-        # Dwing matrix om naar pure integers te gaan
-        matrix = edited_df.fillna(0).astype(int).values.tolist()
+        matrix = [inputs[i:i+4] for i in range(0, 16, 4)]
         
-        # Bepaal het doelgetal op basis van de gekozen methode
+        # Bepaal het doelgetal op basis van de 3 methodes
         if controle_methode == "Automatic (sum of first row)":
             doel = sum(matrix[0])
-        else:
+        elif controle_methode == "Manual input":
             doel = doelgetal_handmatig
+        else:
+            doel = doelgetal_datum
         
         st.info(f"🎯 Target: **{int(doel)}**")
         
