@@ -16,10 +16,10 @@ st.markdown("""
     
     /* 2. Vergroot de tekst/cijfers in de invoervelden van het magische vierkant */
     div[data-testid="stNumberInput"] input {
-        font-size: 24px !important;
-        font-weight: bold !important;
-        text-align: center !important;
-        height: 45px !important;
+        font-size: 24px !important;    /* Pas dit getal aan voor groter/kleiner (standaard is ~16px) */
+        font-weight: bold !important;  /* Maakt de cijfers dikgedrukt voor betere zichtbaarheid */
+        text-align: center !important; /* Zet het getal netjes in het midden van het vakje */
+        height: 45px !important;       /* Maakt het vakje zelf iets hoger zodat het grote cijfer goed past */
     }
     </style>
     """, unsafe_allow_html=True)
@@ -34,27 +34,20 @@ def genereer_random_datum():
     random_dagen = random.randrange(verschil_dagen)
     return start_date + timedelta(days=random_dagen)
 
-def genereer_random_getal():
-    return random.randint(22, 99)
-
 # Sessie-beheer
-if 'reset' not in st.session_state: 
-    st.session_state.reset = 0
-if 'random_date' not in st.session_state:
-    st.session_state.random_date = genereer_random_datum()
-if 'random_target' not in st.session_state:
-    st.session_state.random_target = genereer_random_getal()
+if 'reset' not in st.session_state: st.session_state.reset = 0
+if 'random_date' not in st.session_state: st.session_state.random_date = genereer_random_datum()
+if 'random_target' not in st.session_state: st.session_state.random_target = random.randint(22, 99)
 
 # Keuze voor controle methode
-controle_methode = st.radio(
-    "Target value:", 
-    ["Automatic (sum of first row)", "Manual input", "Random Date (01/01/1900 - Today)", "Random Number (22-99)"]
-)
+controle_methode = st.radio("Target value:", ["Automatic (sum of first row)", "Manual input", "Random Date (01/01/1900 - Today)", "Random Number (22-99)"])
 
+# Variabelen voor de doelgetallen
 doelgetal_handmatig = 0
 doelgetal_datum = 0
+doelgetal_random = st.session_state.random_target
 
-# Logica voor de gekozen methode
+# Dynamische weergave per methode
 if controle_methode == "Manual input":
     with st.container(border=True):
         doelgetal_handmatig = st.number_input(
@@ -66,15 +59,15 @@ elif controle_methode == "Random Date (01/01/1900 - Today)":
     with st.container(border=True):
         datum_string = st.session_state.random_date.strftime("%d/%m/%Y")
         st.write(f"### {datum_string}")
-        # Berekening (onzichtbaar voor de gebruiker)
-        dag = st.session_state.random_date.day
-        maand = st.session_state.random_date.month
-        jaar_volledig = st.session_state.random_date.year
-        doelgetal_datum = dag + maand + (jaar_volledig // 100) + (jaar_volledig % 100)
+        # Berekening
+        d = st.session_state.random_date.day
+        m = st.session_state.random_date.month
+        y = st.session_state.random_date.year
+        doelgetal_datum = d + m + (y // 100) + (y % 100)
 
 elif controle_methode == "Random Number (22-99)":
     with st.container(border=True):
-        st.write(f"### {st.session_state.random_target}")
+        st.write(f"### {doelgetal_random}")
 
 # Raster tekenen
 inputs = []
@@ -93,7 +86,7 @@ with col1:
     if st.button("🗑️ Delete All"):
         st.session_state.reset += 1
         st.session_state.random_date = genereer_random_datum()
-        st.session_state.random_target = genereer_random_getal()
+        st.session_state.random_target = random.randint(22, 99)
         st.rerun()
 
 with col2:
@@ -108,9 +101,9 @@ with col2:
         elif controle_methode == "Random Date (01/01/1900 - Today)":
             doel = doelgetal_datum
         else:
-            doel = st.session_state.random_target
+            doel = doelgetal_random
         
-        st.info(f"🎯 Target: **{int(doel)}**")
+        st.info(f"🎯 Doel: **{int(doel)}**")
         
         foutmeldingen = []
         for i in range(4):
