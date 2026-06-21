@@ -4,52 +4,31 @@ from datetime import date, timedelta
 
 st.set_page_config(page_title="Magic Square Trainer", layout="centered")
 
-# CSS met extra krachtige regels voor mobiele weergave
+# CSS voor styling
 st.markdown("""
     <style>
-    /* 1. Check Now knop */
+    /* 1. Maak de Check Now knop mooi geel */
     div.stButton > button[kind="primary"] {
         background-color: #FFDE00 !important;
         color: #000000 !important;
         border: 2px solid #FFDE00 !important;
     }
     
-    /* 2. Cijfers in de inputvelden */
+    /* 2. Vergroot de tekst/cijfers in de invoervelden van het magische vierkant */
     div[data-testid="stNumberInput"] input {
-        font-size: 20px !important;
+        font-size: 24px !important;
         font-weight: bold !important;
         text-align: center !important;
-        height: 40px !important;
-        padding: 0 !important;
+        height: 45px !important;
     }
     
-    /* 3. Random getal display */
+    /* 3. Maak de weergave van Random Date en Number groot en gecentreerd */
     .large-display {
-        font-size: 24px;
+        font-size: 28px;
         font-weight: bold;
         text-align: center;
         color: #31333F;
         margin-bottom: 5px;
-    }
-
-    /* 4. MOBIELE GRID FIX: Dwingt kolommen in een vierkant */
-    [data-testid="stHorizontalBlock"] {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        gap: 2px !important;
-    }
-    
-    [data-testid="column"] {
-        flex: 1 !important;
-        min-width: 20% !important;
-        padding: 0 1px !important;
-    }
-    
-    /* Zorg dat de container niet uit het scherm loopt */
-    .block-container {
-        padding-left: 0.5rem !important;
-        padding-right: 0.5rem !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -84,37 +63,35 @@ controle_methode = st.radio(
 doelgetal_handmatig = 0
 doelgetal_datum = 0
 
+# Weergave per methode
 if controle_methode == "Manual input":
     with st.container(border=True):
         doelgetal_handmatig = st.number_input(
             "Enter your target number:", min_value=0, step=1, format="%d", 
             key=f"doel_{st.session_state.reset}"
         )
-
 elif controle_methode == "Random Date (01/01/1900 - Today)":
     with st.container(border=True):
         datum_string = st.session_state.random_date.strftime("%d/%m/%Y")
         st.markdown(f"<div class='large-display'>{datum_string}</div>", unsafe_allow_html=True)
+        # Berekening (onzichtbaar)
         dag = st.session_state.random_date.day
         maand = st.session_state.random_date.month
         jaar_volledig = st.session_state.random_date.year
         doelgetal_datum = dag + maand + (jaar_volledig // 100) + (jaar_volledig % 100)
-
 elif controle_methode == "Random Number (22-99)":
     with st.container(border=True):
         st.markdown(f"<div class='large-display'>{st.session_state.random_target}</div>", unsafe_allow_html=True)
 
-# Raster tekenen
+# Raster tekenen (de beproefde methode)
 inputs = []
 for r in range(4):
     cols = st.columns(4)
     for c in range(4):
         val = cols[c].number_input(
-            f"R{r}K{c}", 
-            value=0, 
+            f"R{r}K{c}", value=0, 
             key=f"c{r}{c}_{st.session_state.reset}", 
-            label_visibility="collapsed", 
-            format="%d"
+            label_visibility="collapsed", format="%d"
         )
         inputs.append(int(val))
 
@@ -129,21 +106,28 @@ with col1:
 with col2:
     if st.button("CHECK NOW", type="primary"):
         matrix = [inputs[i:i+4] for i in range(0, 16, 4)]
-        if controle_methode == "Automatic (sum of first row)": doel = sum(matrix[0])
-        elif controle_methode == "Manual input": doel = doelgetal_handmatig
-        elif controle_methode == "Random Date (01/01/1900 - Today)": doel = doelgetal_datum
-        else: doel = st.session_state.random_target
+        
+        if controle_methode == "Automatic (sum of first row)":
+            doel = sum(matrix[0])
+        elif controle_methode == "Manual input":
+            doel = doelgetal_handmatig
+        elif controle_methode == "Random Date (01/01/1900 - Today)":
+            doel = doelgetal_datum
+        else:
+            doel = st.session_state.random_target
         
         st.info(f"🎯 Target: **{int(doel)}**")
+        
         foutmeldingen = []
         for i in range(4):
-            if sum(matrix[i]) != doel: foutmeldingen.append(f"❌ Row {i+1} incorrect.")
-            if sum(matrix[r][i] for r in range(4)) != doel: foutmeldingen.append(f"❌ Col {i+1} incorrect.")
-        if sum(matrix[i][i] for i in range(4)) != doel: foutmeldingen.append("❌ Diagonal incorrect.")
-        if sum(matrix[i][3-i] for i in range(4)) != doel: foutmeldingen.append("❌ Diagonal incorrect.")
+            if sum(matrix[i]) != doel: foutmeldingen.append(f"❌ Row {i+1} is incorrect.")
+            if sum(matrix[r][i] for r in range(4)) != doel: foutmeldingen.append(f"❌ Column {i+1} is incorrect.")
+        if sum(matrix[i][i] for i in range(4)) != doel: foutmeldingen.append("❌ Diagonal (top left-bottom right) is incorrect.")
+        if sum(matrix[i][3-i] for i in range(4)) != doel: foutmeldingen.append("❌ Diagonal (bottom left-top right) is incorrect.")
         
         if not foutmeldingen:
-            st.success(f"🎉 Perfect! Alles is {int(doel)}.")
+            st.success(f"🎉 Perfect. This square is magical in every way. It all adds up to {int(doel)}.")
             st.balloons()
         else:
-            for fout in foutmeldingen: st.error(fout)
+            for fout in foutmeldingen:
+                st.error(fout)
