@@ -71,7 +71,7 @@ if controle_methode == "Manual input":
             key=f"doel_{st.session_state.reset}"
         )
 
-elif controle_methode == "Random Date":
+elif controle_methode == "Random Date (01/01/1900 - today)":
     with st.container(border=True):
         # Format de datum naar DD/MM/YYYY en toon deze groot op het scherm
         datum_string = st.session_state.random_date.strftime("%d/%m/%Y")
