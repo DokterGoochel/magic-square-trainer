@@ -112,4 +112,47 @@ for r in range(4):
     cols = st.columns(4)
     for c in range(4):
         val = cols[c].number_input(
-            f"R{r}
+            f"R{r}K{c}", 
+            value=0, 
+            key=f"c{r}{c}_{st.session_state.reset}", 
+            label_visibility="collapsed", 
+            format="%d"
+        )
+        inputs.append(int(val))
+
+col1, col2 = st.columns(2)
+with col1:
+    if st.button("🗑️ Delete All"):
+        st.session_state.reset += 1
+        st.session_state.random_date = genereer_random_datum() 
+        st.session_state.random_target = genereer_random_getal()
+        st.rerun()
+
+with col2:
+    if st.button("CHECK NOW", type="primary"):
+        matrix = [inputs[i:i+4] for i in range(0, 16, 4)]
+        
+        if controle_methode == "Automatic (sum of first row)":
+            doel = sum(matrix[0])
+        elif controle_methode == "Manual input":
+            doel = doelgetal_handmatig
+        elif controle_methode == "Random Date (01/01/1900 - Today)":
+            doel = doelgetal_datum
+        else: # Random Number (22-99)
+            doel = st.session_state.random_target
+        
+        st.info(f"🎯 Target: **{int(doel)}**")
+        
+        foutmeldingen = []
+        for i in range(4):
+            if sum(matrix[i]) != doel: foutmeldingen.append(f"❌ Row {i+1} is incorrect.")
+            if sum(matrix[r][i] for r in range(4)) != doel: foutmeldingen.append(f"❌ Column {i+1} is incorrect.")
+        if sum(matrix[i][i] for i in range(4)) != doel: foutmeldingen.append("❌ Diagonal (top left-bottom right) is incorrect.")
+        if sum(matrix[i][3-i] for i in range(4)) != doel: foutmeldingen.append("❌ Diagonal (bottom left-top right) is incorrect.")
+        
+        if not foutmeldingen:
+            st.success(f"🎉 Perfect. This square is magical in every way. It all adds up to {int(doel)}.")
+            st.balloons()
+        else:
+            for fout in foutmeldingen:
+                st.error(fout)
