@@ -1,4 +1,6 @@
 import streamlit as st
+import random
+from datetime import date, timedelta
 
 st.set_page_config(page_title="Magic Square Trainer", layout="centered")
 
@@ -24,21 +26,48 @@ st.markdown("""
 
 st.title("🪄 Magic Square Trainer")
 
+# Helper functies
+def genereer_random_datum():
+    start_date = date(1900, 1, 1)
+    end_date = date.today()
+    verschil_dagen = (end_date - start_date).days
+    random_dagen = random.randrange(verschil_dagen)
+    return start_date + timedelta(days=random_dagen)
+
 # Sessie-beheer
 if 'reset' not in st.session_state: st.session_state.reset = 0
+if 'random_date' not in st.session_state: st.session_state.random_date = genereer_random_datum()
+if 'random_target' not in st.session_state: st.session_state.random_target = random.randint(22, 99)
 
 # Keuze voor controle methode
-controle_methode = st.radio("Target value:", ["Automatic (sum of first row)", "Manual input"])
+controle_methode = st.radio("Target value:", ["Automatic (sum of first row)", "Manual input", "Random Date (01/01/1900 - Today)", "Random Number (22-99)"])
 
-# Dynamische invoer voor handmatig doelgetal
+# Variabelen voor de doelgetallen
 doelgetal_handmatig = 0
+doelgetal_datum = 0
+doelgetal_random = st.session_state.random_target
+
+# Dynamische weergave per methode
 if controle_methode == "Manual input":
-    # Een strak kader zonder extra titels, alleen de invoerbalk
     with st.container(border=True):
         doelgetal_handmatig = st.number_input(
             "Enter your target number:", min_value=0, step=1, format="%d", 
             key=f"doel_{st.session_state.reset}"
         )
+
+elif controle_methode == "Random Date (01/01/1900 - Today)":
+    with st.container(border=True):
+        datum_string = st.session_state.random_date.strftime("%d/%m/%Y")
+        st.write(f"### {datum_string}")
+        # Berekening
+        d = st.session_state.random_date.day
+        m = st.session_state.random_date.month
+        y = st.session_state.random_date.year
+        doelgetal_datum = d + m + (y // 100) + (y % 100)
+
+elif controle_methode == "Random Number (22-99)":
+    with st.container(border=True):
+        st.write(f"### {doelgetal_random}")
 
 # Raster tekenen
 inputs = []
@@ -56,17 +85,23 @@ col1, col2 = st.columns(2)
 with col1:
     if st.button("🗑️ Delete All"):
         st.session_state.reset += 1
+        st.session_state.random_date = genereer_random_datum()
+        st.session_state.random_target = random.randint(22, 99)
         st.rerun()
 
 with col2:
     if st.button("CHECK NOW", type="primary"):
         matrix = [inputs[i:i+4] for i in range(0, 16, 4)]
         
-        # Bepaal het doelgetal op basis van de gekozen methode
+        # Bepaal het doelgetal
         if controle_methode == "Automatic (sum of first row)":
             doel = sum(matrix[0])
-        else:
+        elif controle_methode == "Manual input":
             doel = doelgetal_handmatig
+        elif controle_methode == "Random Date (01/01/1900 - Today)":
+            doel = doelgetal_datum
+        else:
+            doel = doelgetal_random
         
         st.info(f"🎯 Doel: **{int(doel)}**")
         
@@ -81,6 +116,5 @@ with col2:
             st.success(f"🎉 Perfect. This square is magical in every way. It all adds up to {int(doel)}.")
             st.balloons()
         else:
-            # GEWIZIGD: Nette for-loop in plaats van list comprehension voorkomt de dropdown weergave
             for fout in foutmeldingen:
                 st.error(fout)
