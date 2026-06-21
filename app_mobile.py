@@ -5,31 +5,11 @@ from datetime import date, timedelta
 
 st.set_page_config(page_title="Magic Square Trainer", layout="centered")
 
-# CSS styling
-st.markdown("""
-    <style>
-    div.stButton > button[kind="primary"] {
-        background-color: #FFDE00 !important;
-        color: #000000 !important;
-        border: 2px solid #FFDE00 !important;
-    }
-    .large-display {
-        font-size: 28px;
-        font-weight: bold;
-        text-align: center;
-        color: #31333F;
-        margin-bottom: 5px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-st.title("🪄 Magic Square Trainer")
-
 # Helper functies voor de random generatoren
 def reset_grid():
     st.session_state.magic_grid = pd.DataFrame(
         [[0] * 4 for _ in range(4)],
-        columns=["", " ", "  ", "   "]
+        columns=["", " ", "  ", "    "]
     )
 
 def genereer_random_datum():
@@ -47,6 +27,50 @@ if 'magic_grid' not in st.session_state: reset_grid()
 if 'reset' not in st.session_state: st.session_state.reset = 0
 if 'random_date' not in st.session_state: st.session_state.random_date = genereer_random_datum()
 if 'random_target' not in st.session_state: st.session_state.random_target = genereer_random_getal()
+if 'font_size' not in st.session_state: st.session_state.font_size = 18  # Standaardgrootte
+
+# Lettergrootte bediening (kleine knoppen bovenaan)
+col_a, col_b, col_space = st.columns([1, 1, 6])
+with col_a:
+    if st.button("A-"):
+        st.session_state.font_size -= 2
+with col_b:
+    if st.button("A+"):
+        st.session_state.font_size += 2
+
+# CSS styling met dynamische lettergrootte via een f-string
+st.markdown(f"""
+    <style>
+    /* Dynamische lettergrootte voor labels, teksten en radiobuttons */
+    p, label, div[data-baseweb="radio"] div {{
+        font-size: {st.session_state.font_size}px !important;
+    }}
+    
+    /* Zorg dat de tekst in alle actie-knoppen meeschaalt */
+    div.stButton > button {{
+        font-size: {st.session_state.font_size}px !important;
+    }}
+
+    /* 1. Maak de Check Now knop mooi geel */
+    div.stButton > button[kind="primary"] {{
+        background-color: #FFDE00 !important;
+        color: #000000 !important;
+        border: 2px solid #FFDE00 !important;
+        font-weight: bold !important;
+    }}
+    
+    /* Display voor grote getallen/datums */
+    .large-display {{
+        font-size: 28px;
+        font-weight: bold;
+        text-align: center;
+        color: #31333F;
+        margin-bottom: 5px;
+    }}
+    </style>
+    """, unsafe_allow_html=True)
+
+st.title("🪄 Magic Square Trainer")
 
 # Keuze voor controle methode (4 opties)
 controle_methode = st.radio(
