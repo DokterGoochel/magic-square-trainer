@@ -4,7 +4,7 @@ from datetime import date, timedelta
 
 st.set_page_config(page_title="Magic Square Trainer", layout="centered")
 
-# CSS voor de gele knop én grotere cijfers
+# CSS voor styling
 st.markdown("""
     <style>
     /* 1. Maak de Check Now knop mooi geel */
@@ -22,8 +22,8 @@ st.markdown("""
         height: 45px !important;
     }
     
-    /* 3. Maak de weergegeven random datum mooi groot en gecentreerd */
-    .random-date-display {
+    /* 3. Maak de weergegeven random datum en het getal mooi groot en gecentreerd */
+    .large-display {
         font-size: 28px;
         font-weight: bold;
         text-align: center;
@@ -35,7 +35,7 @@ st.markdown("""
 
 st.title("🪄 Magic Square Trainer")
 
-# Helper functie om een willekeurige datum te genereren
+# Helper functies
 def genereer_random_datum():
     start_date = date(1900, 1, 1)
     end_date = date.today()
@@ -43,17 +43,21 @@ def genereer_random_datum():
     random_dagen = random.randrange(verschil_dagen)
     return start_date + timedelta(days=random_dagen)
 
+def genereer_random_getal():
+    return random.randint(22, 99)
+
 # Sessie-beheer
 if 'reset' not in st.session_state: 
     st.session_state.reset = 0
-# Bewaar de gegenereerde datum in het geheugen zodat deze niet verspringt tijdens het typen
 if 'random_date' not in st.session_state:
     st.session_state.random_date = genereer_random_datum()
+if 'random_target' not in st.session_state:
+    st.session_state.random_target = genereer_random_getal()
 
-# Keuze voor controle methode
+# Keuze voor controle methode (Nu 4 opties)
 controle_methode = st.radio(
     "Target value:", 
-    ["Automatic (sum of first row)", "Manual input", "Random Date"]
+    ["Automatic (sum of first row)", "Manual input", "Random Date", "Random Number (22-99)"]
 )
 
 doelgetal_handmatig = 0
@@ -70,20 +74,22 @@ elif controle_methode == "Random Date":
     with st.container(border=True):
         # Format de datum naar DD/MM/YYYY en toon deze groot op het scherm
         datum_string = st.session_state.random_date.strftime("%d/%m/%Y")
-        st.markdown(f"<div class='random-date-display'>{datum_string}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='large-display'>{datum_string}</div>", unsafe_allow_html=True)
         
-        # Berekening van de controlesom
+        # Berekening van de controlesom (onzichtbaar voor de gebruiker)
         dag = st.session_state.random_date.day
         maand = st.session_state.random_date.month
         jaar_volledig = st.session_state.random_date.year
         
-        eeuw = jaar_volledig // 100       # Eerste twee cijfers jaartal
-        jaar_kort = jaar_volledig % 100    # Laatste twee cijfers jaartal
+        eeuw = jaar_volledig // 100
+        jaar_kort = jaar_volledig % 100
         
         doelgetal_datum = dag + maand + eeuw + jaar_kort
-        
-        # Subtiele visuele controle gecentreerd onder de datum
-        st.caption(f"<div style='text-align: center;'>Target sum calculation: {dag} + {maand} + {eeuw} + {jaar_kort} = <b>{doelgetal_datum}</b></div>", unsafe_allow_html=True)
+
+elif controle_methode == "Random Number (22-99)":
+    with st.container(border=True):
+        # Toon het random getal groot op het scherm
+        st.markdown(f"<div class='large-display'>{st.session_state.random_target}</div>", unsafe_allow_html=True)
 
 # Raster tekenen
 inputs = []
@@ -92,42 +98,4 @@ for r in range(4):
     for c in range(4):
         val = cols[c].number_input(
             f"R{r}K{c}", value=0, 
-            key=f"c{r}{c}_{st.session_state.reset}", 
-            label_visibility="collapsed", format="%d"
-        )
-        inputs.append(int(val))
-
-col1, col2 = st.columns(2)
-with col1:
-    if st.button("🗑️ Delete All"):
-        st.session_state.reset += 1
-        # Genereer direct een nieuwe random datum als je het bord wist
-        st.session_state.random_date = genereer_random_datum() 
-        st.rerun()
-
-with col2:
-    if st.button("CHECK NOW", type="primary"):
-        matrix = [inputs[i:i+4] for i in range(0, 16, 4)]
-        
-        if controle_methode == "Automatic (sum of first row)":
-            doel = sum(matrix[0])
-        elif controle_methode == "Manual input":
-            doel = doelgetal_handmatig
-        else:
-            doel = doelgetal_datum
-        
-        st.info(f"🎯 Target: **{int(doel)}**")
-        
-        foutmeldingen = []
-        for i in range(4):
-            if sum(matrix[i]) != doel: foutmeldingen.append(f"❌ Row {i+1} is incorrect.")
-            if sum(matrix[r][i] for r in range(4)) != doel: foutmeldingen.append(f"❌ Column {i+1} is incorrect.")
-        if sum(matrix[i][i] for i in range(4)) != doel: foutmeldingen.append("❌ Diagonal (top left-bottom right) is incorrect.")
-        if sum(matrix[i][3-i] for i in range(4)) != doel: foutmeldingen.append("❌ Diagonal (bottom left-top right) is incorrect.")
-        
-        if not foutmeldingen:
-            st.success(f"🎉 Perfect. This square is magical in every way. It all adds up to {int(doel)}.")
-            st.balloons()
-        else:
-            for fout in foutmeldingen:
-                st.error(fout)
+            key=f"c{r}{c
